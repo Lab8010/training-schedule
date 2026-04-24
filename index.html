@@ -9,11 +9,7 @@
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; background: #f0f2f5; color: #333; min-height: 100vh; }
 
     /* Header */
-    .app-header {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      color: white; padding: 12px 20px;
-      display: flex; align-items: center; justify-content: space-between;
-    }
+    .app-header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
     .app-header h1 { font-size: 18px; font-weight: 600; }
     .app-header .subtitle { font-size: 12px; color: #9bb3d4; }
 
@@ -26,48 +22,50 @@
     /* Views */
     .view { display: none; padding: 16px 20px; }
     .view.active { display: block; }
-
-    /* Section title */
     .section-title { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
 
     /* Course Library */
-    .course-lib {
-      display: flex; flex-wrap: wrap; gap: 6px;
-      padding: 12px; background: white; border-radius: 8px;
-      margin-bottom: 14px; border: 1px solid #e0e0e0;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    }
-    .course-card {
-      padding: 6px 10px; border-radius: 6px;
-      background: #e8f4fd; border: 1.5px solid #93c5fd; color: #1e40af;
-      cursor: grab; font-size: 12px; user-select: none;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
+    .course-lib { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px; background: white; border-radius: 8px; margin-bottom: 14px; border: 1px solid #e0e0e0; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .course-card { padding: 6px 10px; border-radius: 6px; background: #e8f4fd; border: 1.5px solid #93c5fd; color: #1e40af; cursor: grab; font-size: 12px; user-select: none; transition: transform 0.15s, box-shadow 0.15s; }
     .course-card:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(30,64,175,0.2); }
     .course-card:active { cursor: grabbing; }
     .course-card .cid { font-weight: 700; }
     .course-card .cmeta { color: #3b82f6; font-size: 11px; }
 
-    /* Calendar wrapper */
-    .cal-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid #e0e0e0; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    /* ── カレンダー共通 ─────────────────────────── */
+    /* 外側ラッパー — overflow と border だけ担当 */
+    .cal-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid #e0e0e0; box-shadow: 0 1px 3px rgba(0,0,0,0.06); background: white; }
 
-    /* Calendar Grid: 8 columns (week-label + 7 days) */
-    .calendar { display: grid; grid-template-columns: 64px repeat(7, 1fr); min-width: 680px; background: white; }
+    /*
+     * 週ごとにサブグリッドを作る方式:
+     *   .week-section { display: grid; grid-template-columns: 64px repeat(7,1fr); }
+     *
+     * ─ 行1    : 日付数字セル (drop zone in admin)
+     * ─ 行2〜N : コースレーン (course block が grid-column: span N で複数列をまたぐ)
+     *
+     * 各週が同じ grid-template-columns を持つため
+     * 全週で列幅が自動的に揃う。
+     */
+    .week-section {
+      display: grid;
+      grid-template-columns: 64px repeat(7, 1fr);
+      min-width: 680px;
+    }
 
-    /* Header cells */
+    /* ヘッダー行 */
     .ch { padding: 8px 4px; text-align: center; font-size: 11px; font-weight: 700; background: #1e293b; color: #94a3b8; border-right: 1px solid #2d3748; letter-spacing: 0.3px; }
-    .ch.wk { color: white; font-size: 12px; }
+    .ch.wk  { color: white; font-size: 12px; }
     .ch.sat { color: #93c5fd; }
     .ch.sun { color: #fca5a5; }
 
-    /* Week label */
+    /* 週ラベル (grid-row: 1 / span N でコースレーン行もカバー) */
     .wk-label { padding: 6px 4px; text-align: center; background: #f8fafc; border-right: 2px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; font-size: 11px; font-weight: 700; color: #475569; }
     .wk-label .sub { font-size: 9px; color: #94a3b8; font-weight: 400; display: block; }
     .wk-label .cnt { font-size: 10px; color: #64748b; display: block; margin-top: 2px; }
     .wk-label .cnt.warn { color: #ef4444; font-weight: 700; }
 
-    /* Day cells */
-    .dc { border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; min-height: 80px; padding: 2px; position: relative; }
+    /* 日付数字セル (行1 — ドロップターゲット兼用) */
+    .dc { border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; min-height: 52px; padding: 3px; }
     .dc.empty { background: #f8fafc; }
     .dc.biz   { background: white; }
     .dc.sat   { background: #fef9f9; }
@@ -75,42 +73,46 @@
     .dc.hol   { background: #fff0f0; }
     .dc.drop-over { background: #ecfdf5 !important; outline: 2px dashed #10b981; outline-offset: -2px; }
 
-    /* Day number */
-    .day-num { font-size: 11px; padding: 1px 3px; color: #94a3b8; line-height: 1.4; }
+    .day-num  { font-size: 11px; padding: 1px 3px; color: #94a3b8; line-height: 1.4; }
     .dc.biz .day-num { color: #475569; }
     .dc.sat .day-num { color: #60a5fa; }
     .dc.sun .day-num, .dc.hol .day-num { color: #ef4444; }
     .hol-name { font-size: 9px; color: #ef4444; display: block; }
 
-    /* Course blocks */
-    .cb { margin: 2px 1px; padding: 3px 5px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 600; line-height: 1.3; transition: opacity 0.15s; }
-    .cb:hover { opacity: 0.82; }
-    .cb .cb-id   { display: block; }
-    .cb .cb-info { display: block; font-size: 10px; font-weight: 400; opacity: 0.9; }
+    /* コースレーン行の背景セル */
+    .lane-bg { border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; background: white; min-height: 8px; }
+    .lane-bg.shaded { background: #f8fafc; }
 
-    /* Status colors (org view) */
+    /* コースブロックラッパー (grid-column: span N を持つグリッドアイテム) */
+    .cb-wrap { padding: 2px 2px 3px; position: relative; z-index: 1; }
+
+    /* コースブロック本体 */
+    .cb { display: block; width: 100%; padding: 4px 6px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 600; line-height: 1.35; transition: opacity 0.15s; }
+    .cb:hover { opacity: 0.82; }
+    .cb .cb-id   { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cb .cb-info { display: block; font-size: 10px; font-weight: 400; opacity: 0.9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Admin view — org カラー */
+    .cb-org { color: white; border-left: 4px solid rgba(0,0,0,0.2); }
+    .cb-r1  { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+    /* 組織選択セレクト (コースブロック内) */
+    .org-sel-i { font-size: 10px; padding: 1px 2px; border: none; border-radius: 3px; background: rgba(255,255,255,0.28); color: white; cursor: pointer; flex-shrink: 0; max-width: 60px; }
+    .org-sel-i option { color: #333; background: white; }
+
+    /* Org view — ステータスカラー */
     .s-confirmed        { background: #d1fae5; border-left: 3px solid #059669; color: #065f46; }
     .s-proposed         { background: #dbeafe; border-left: 3px solid #3b82f6; color: #1e3a8a; }
     .s-unavail-class    { background: #fee2e2; border-left: 3px solid #ef4444; color: #7f1d1d; }
     .s-unavail-personal { background: #ffedd5; border-left: 3px solid #f97316; color: #7c2d12; }
     .s-unassigned       { background: #f1f5f9; border: 1.5px dashed #94a3b8; color: #64748b; }
 
-    /* Org-colored blocks (admin view) */
-    .cb-org { color: white; }
-
-    /* Continuation bar */
-    .cont-bar { height: 5px; border-radius: 2px; margin: 2px 1px; opacity: 0.5; }
-
-    /* Org select in admin view */
-    .org-sel { font-size: 10px; padding: 1px 2px; border: 1px solid #e2e8f0; border-radius: 3px; width: 100%; margin-top: 2px; background: white; color: #475569; cursor: pointer; }
-
-    /* Org tabs */
+    /* Org タブ */
     .org-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
     .org-tab { padding: 7px 18px; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 13px; color: white; border: 2px solid transparent; transition: all 0.2s; opacity: 0.75; }
     .org-tab:hover { opacity: 0.9; }
     .org-tab.active { opacity: 1; border-color: rgba(0,0,0,0.3); box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
 
-    /* Modal */
+    /* モーダル */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(2px); }
     .modal { background: white; border-radius: 12px; padding: 24px; width: 420px; max-width: 92vw; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
     .modal-header { margin-bottom: 16px; }
@@ -156,17 +158,13 @@
   <div class="section-title">コースライブラリ — ドラッグしてカレンダーへ配置</div>
   <div class="course-lib" id="course-lib"></div>
   <div class="section-title">スケジュールカレンダー（最大4クラス/週）</div>
-  <div class="cal-wrapper">
-    <div class="calendar" id="admin-cal"></div>
-  </div>
+  <div class="cal-wrapper" id="admin-cal"></div>
 </div>
 
 <!-- Org View -->
 <div id="view-org" class="view">
   <div class="org-tabs" id="org-tabs"></div>
-  <div class="cal-wrapper">
-    <div class="calendar" id="org-cal"></div>
-  </div>
+  <div class="cal-wrapper" id="org-cal"></div>
 </div>
 
 <!-- YAML View -->
@@ -232,11 +230,9 @@ const ORGS = [
   {id:'org-c', label:'Org-C', color:'#BA7517', instructors:['講師C1','講師C2']},
 ];
 
-// 祝日 (日付 → 名称)
 const HOLIDAYS = {29: '昭和の日'};
 
-// 2026年4月カレンダー構造 (0=月曜〜6=日曜)
-// 4/1 = 水曜日 (getDay()=3 → 月ベース index=2)
+// 2026年4月 (4/1=水曜, 月ベースindex=2)
 const WEEKS = [
   {label:'W1', sub:'4/1〜',  days:[null,null,1,2,3,4,5]},
   {label:'W2', sub:'4/6〜',  days:[6,7,8,9,10,11,12]},
@@ -246,7 +242,7 @@ const WEEKS = [
 ];
 const DOW = ['月','火','水','木','金','土','日'];
 
-// ── 状態 ────────────────────────────────────────────
+// ── 状態 ─────────────────────────────────────────────
 let placements  = [];   // [{id, courseId, start, days, org}]
 let assignments = {};   // {pid: {instructor, status, notes}}
 let nextId      = 1;
@@ -254,7 +250,7 @@ let currentOrg  = ORGS[0].id;
 let modalPid    = null;
 let dragCourseId = null;
 
-// ── ユーティリティ ───────────────────────────────────
+// ── ユーティリティ ────────────────────────────────────
 const getCourse = id => COURSE_LIB.find(c => c.id === id);
 const getOrg    = id => ORGS.find(o => o.id === id);
 
@@ -271,6 +267,7 @@ const isBizDay  = day => day !== null && !isWeekend(day) && !isHoliday(day);
 const allDays   = ()  => WEEKS.flatMap(w => w.days).filter(d => d !== null);
 const weekIdxOf = day => WEEKS.findIndex(w => w.days.includes(day));
 
+// コースが占有する営業日リストを返す (祝日・土日をスキップして連続計算)
 function getOccupiedDays(p) {
   const days = allDays();
   const si   = days.indexOf(p.start);
@@ -289,19 +286,19 @@ function countInWeek(wIdx) {
 }
 
 function dayClass(day, dIdx) {
-  if (day === null)       return 'dc empty';
-  if (HOLIDAYS[day])      return 'dc hol';
-  if (dIdx === 5)         return 'dc sat';
-  if (dIdx === 6)         return 'dc sun';
+  if (day === null)  return 'dc empty';
+  if (HOLIDAYS[day]) return 'dc hol';
+  if (dIdx === 5)    return 'dc sat';
+  if (dIdx === 6)    return 'dc sun';
   return 'dc biz';
 }
 
 const statusLabel = s => ({
   confirmed:'確定', proposed:'検討中',
-  'unavail-class':'不可/他クラス', 'unavail-personal':'不可/都合', unassigned:'未割当'
+  'unavail-class':'不可/他クラス', 'unavail-personal':'不可/講師都合', unassigned:'未割当'
 }[s] || s);
 
-// ── タブ切り替え ─────────────────────────────────────
+// ── タブ切り替え ──────────────────────────────────────
 document.getElementById('tab-bar').addEventListener('click', e => {
   const tab = e.target.closest('.tab');
   if (!tab) return;
@@ -315,13 +312,7 @@ document.getElementById('tab-bar').addEventListener('click', e => {
   if (view === 'admin') renderAdminView();
 });
 
-// ── カレンダーヘッダー ───────────────────────────────
-function calHeader() {
-  return `<div class="ch wk">週</div>` +
-    DOW.map((d, i) => `<div class="ch ${i===5?'sat':i===6?'sun':''}">${d}</div>`).join('');
-}
-
-// ── コースライブラリ ─────────────────────────────────
+// ── コースライブラリ ──────────────────────────────────
 function renderCourseLib() {
   document.getElementById('course-lib').innerHTML = COURSE_LIB.map(c =>
     `<div class="course-card" draggable="true" data-cid="${c.id}" title="${c.desc}">
@@ -329,7 +320,6 @@ function renderCourseLib() {
       <span class="cmeta"> ${c.days}d · ${c.ver}</span>
     </div>`
   ).join('');
-
   document.querySelectorAll('.course-card').forEach(card => {
     card.addEventListener('dragstart', e => {
       dragCourseId = e.currentTarget.dataset.cid;
@@ -338,59 +328,182 @@ function renderCourseLib() {
   });
 }
 
-// ── Admin View ───────────────────────────────────────
-function renderAdminView() {
-  renderCourseLib();
-  let html = calHeader();
+// ── レーン計算 ────────────────────────────────────────
+/*
+ * 1週内でコースがどの列に何列分スパンするかを計算し、
+ * 複数コースを重ならないようにレーン(行)へ割り当てる。
+ *
+ * - startCol: 週ラベル列=1、月=2、…、日=8
+ * - span: startCol〜endCol の列数 (祝日をまたいでも列は連続)
+ * - laneOf: segment → lane index (0始まり)
+ */
+function computeWeekLanes(weekIdx, orgFilter) {
+  const wDays    = WEEKS[weekIdx].days;
+  const filtered = orgFilter ? placements.filter(p => p.org === orgFilter) : placements;
 
+  const segments = [];
+  filtered.forEach(p => {
+    const occ     = getOccupiedDays(p);
+    const weekOcc = occ.filter(d => wDays.includes(d));
+    if (weekOcc.length === 0) return;
+
+    const startCol = wDays.indexOf(weekOcc[0]) + 2;                       // +2: col1=週ラベル
+    const endCol   = wDays.indexOf(weekOcc[weekOcc.length - 1]) + 2;
+    const span     = endCol - startCol + 1;                               // 祝日列もまたいでOK
+    segments.push({p, startCol, endCol, span});
+  });
+
+  // 開始列順にソート
+  segments.sort((a, b) => a.startCol - b.startCol);
+
+  // 貪欲法でレーン割り当て
+  const laneEnds = []; // 各レーンの最後の endCol
+  const laneOf   = new Map();
+
+  segments.forEach(seg => {
+    let placed = false;
+    for (let li = 0; li < laneEnds.length; li++) {
+      if (seg.startCol > laneEnds[li]) {
+        laneEnds[li] = seg.endCol;
+        laneOf.set(seg, li);
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) {
+      laneOf.set(seg, laneEnds.length);
+      laneEnds.push(seg.endCol);
+    }
+  });
+
+  return {segments, laneOf, laneCount: laneEnds.length};
+}
+
+// ── カレンダー描画 (Admin / Org 共通) ─────────────────
+/*
+ * 週ごとに独立した .week-section (CSS Grid 8列) を生成。
+ * 全週が同じ grid-template-columns を持つため列幅が自動的に揃う。
+ *
+ * 各週の構造:
+ *   grid-row 1   : 日付数字セル (ドロップターゲット)
+ *   grid-row 2〜N: コースレーン (course block が複数列をspan)
+ *
+ * 週ラベルは grid-row: 1 / span (1+laneCount) で全行に張る。
+ */
+function renderCalendarGrid(elId, orgFilter, isAdmin) {
+  const el = document.getElementById(elId);
+  let html = '';
+
+  // ヘッダー行
+  html += `<div class="week-section">
+    <div class="ch wk" style="grid-row:1;grid-column:1">週</div>
+    ${DOW.map((d, i) =>
+      `<div class="ch ${i===5?'sat':i===6?'sun':''}" style="grid-row:1;grid-column:${i+2}">${d}</div>`
+    ).join('')}
+  </div>`;
+
+  // 週セクション
   WEEKS.forEach((week, wIdx) => {
-    const cnt  = countInWeek(wIdx);
-    const warn = cnt >= 4;
-    html += `<div class="wk-label">${week.label}<span class="sub">${week.sub}</span><span class="cnt ${warn?'warn':''}">${cnt}/4</span></div>`;
+    const {segments, laneOf, laneCount} = computeWeekLanes(wIdx, orgFilter);
+    const totalRows = 1 + laneCount;
+    const cnt  = placements.filter(p => week.days.includes(p.start)).length;
+    const warn = isAdmin && cnt >= 4;
 
+    let inner = '';
+
+    // 週ラベル (全行をspan)
+    inner += `<div class="wk-label" style="grid-row:1/span ${totalRows};grid-column:1">
+      ${week.label}<span class="sub">${week.sub}</span>
+      ${isAdmin ? `<span class="cnt ${warn?'warn':''}">${cnt}/4</span>` : ''}
+    </div>`;
+
+    // 日付数字セル (row 1) — admin ではドロップターゲット
     week.days.forEach((day, dIdx) => {
-      const cls      = dayClass(day, dIdx);
-      const canDrop  = isBizDay(day);
-      const dropAttr = canDrop ? `data-day="${day}" class="${cls} drop-zone"` : `class="${cls}"`;
+      const col     = dIdx + 2;
+      const cls     = dayClass(day, dIdx);
+      const canDrop = isAdmin && isBizDay(day);
+      inner += `<div class="${cls}${canDrop?' drop-zone':''}" ${canDrop?`data-day="${day}"`:''}
+        style="grid-row:1;grid-column:${col}">
+        ${day !== null
+          ? `<div class="day-num">${day}${HOLIDAYS[day]?`<span class="hol-name">${HOLIDAYS[day]}</span>`:''}</div>`
+          : ''}
+      </div>`;
+    });
 
-      let inner = '';
-      if (day !== null) {
-        inner += `<div class="day-num">${day}${HOLIDAYS[day]?`<span class="hol-name">${HOLIDAYS[day]}</span>`:''}</div>`;
+    // コースレーン行の背景セル (row 2〜)
+    for (let li = 0; li < laneCount; li++) {
+      const row = li + 2;
+      week.days.forEach((day, dIdx) => {
+        const col     = dIdx + 2;
+        const shaded  = day === null || dIdx >= 5 || !!HOLIDAYS[day];
+        inner += `<div class="lane-bg${shaded?' shaded':''}" style="grid-row:${row};grid-column:${col}"></div>`;
+      });
+    }
+
+    // コースブロック (grid-column: startCol / span N で複数列またぎ)
+    segments.forEach(seg => {
+      const li  = laneOf.get(seg);
+      const row = li + 2;
+      const {p, startCol, span} = seg;
+      const course = getCourse(p.courseId);
+      const org    = getOrg(p.org);
+      const asgn   = assignments[p.id] || {};
+      const status = asgn.status || 'unassigned';
+
+      inner += `<div class="cb-wrap" style="grid-row:${row};grid-column:${startCol}/span ${span}">`;
+
+      if (isAdmin) {
+        const orgOpts = ORGS.map(o =>
+          `<option value="${o.id}"${p.org===o.id?' selected':''}>${o.label}</option>`
+        ).join('');
+        inner += `<div class="cb cb-org"
+          style="background:${org?org.color:'#999'}"
+          onclick="openModal('${p.id}')"
+          title="${course?course.desc:''} | ${p.days}日間">
+          <div class="cb-r1">
+            <span class="cb-id">${p.courseId} · ${p.days}d</span>
+            <select class="org-sel-i"
+              onclick="event.stopPropagation()"
+              onchange="changePlacementOrg('${p.id}',this.value);renderAdminView()">${orgOpts}</select>
+          </div>
+          <span class="cb-info">${statusLabel(status)}</span>
+        </div>`;
+      } else {
+        const inst = asgn.instructor || '未割当';
+        inner += `<div class="cb s-${status}"
+          onclick="openModal('${p.id}')"
+          title="${course?course.desc:''} | ${p.days}日間 | ${inst}">
+          <span class="cb-id">${p.courseId}${span >= 3 && course ? ' — ' + course.desc : ''}</span>
+          <span class="cb-info">${inst}</span>
+        </div>`;
       }
 
-      placements.filter(p => p.start === day).forEach(p => {
-        const course   = getCourse(p.courseId);
-        const org      = getOrg(p.org);
-        const asgn     = assignments[p.id] || {};
-        const occupied = getOccupiedDays(p);
-        const endDay   = occupied[occupied.length - 1];
-        const orgOpts  = ORGS.map(o => `<option value="${o.id}"${p.org===o.id?' selected':''}>${o.label}</option>`).join('');
+      inner += `</div>`;
+    });
 
-        inner += `<div class="cb cb-org" style="background:${org?org.color:'#999'};border-left:4px solid rgba(0,0,0,0.2)"
-          onclick="openModal('${p.id}')"
-          title="${course?course.desc:''} | ${p.days}日間 | 4/${p.start}〜4/${endDay}">
-          <span class="cb-id">${p.courseId} · ${p.days}d</span>
-          <span class="cb-info">${statusLabel(asgn.status||'unassigned')}</span>
-        </div>
-        <select class="org-sel" onchange="changePlacementOrg('${p.id}',this.value)">${orgOpts}</select>`;
+    html += `<div class="week-section">${inner}</div>`;
+  });
+
+  el.innerHTML = html;
+
+  // ドロップイベント (Admin のみ)
+  if (isAdmin) {
+    el.querySelectorAll('.drop-zone').forEach(cell => {
+      cell.addEventListener('dragover', e => { e.preventDefault(); cell.classList.add('drop-over'); });
+      cell.addEventListener('dragleave', () => cell.classList.remove('drop-over'));
+      cell.addEventListener('drop', e => {
+        e.preventDefault();
+        cell.classList.remove('drop-over');
+        handleDrop(parseInt(cell.dataset.day, 10));
       });
-
-      html += `<div ${dropAttr}>${inner}</div>`;
     });
-  });
+  }
+}
 
-  const cal = document.getElementById('admin-cal');
-  cal.innerHTML = html;
-
-  cal.querySelectorAll('.drop-zone').forEach(cell => {
-    cell.addEventListener('dragover', e => { e.preventDefault(); cell.classList.add('drop-over'); });
-    cell.addEventListener('dragleave', () => cell.classList.remove('drop-over'));
-    cell.addEventListener('drop', e => {
-      e.preventDefault();
-      cell.classList.remove('drop-over');
-      handleDrop(parseInt(cell.dataset.day, 10));
-    });
-  });
+// ── Admin View ────────────────────────────────────────
+function renderAdminView() {
+  renderCourseLib();
+  renderCalendarGrid('admin-cal', null, true);
 }
 
 function handleDrop(day) {
@@ -412,63 +525,17 @@ function changePlacementOrg(pid, orgId) {
   if (p) p.org = orgId;
 }
 
-// ── Org View ─────────────────────────────────────────
+// ── Org View ──────────────────────────────────────────
 function renderOrgView() {
   document.getElementById('org-tabs').innerHTML = ORGS.map(o =>
     `<div class="org-tab ${currentOrg===o.id?'active':''}" style="background:${o.color}" onclick="selectOrg('${o.id}')">${o.label}</div>`
   ).join('');
-
-  const org = getOrg(currentOrg);
-
-  // Build dayMap: day → [{p, isStart}]
-  const dayMap = {};
-  placements.filter(p => p.org === currentOrg).forEach(p => {
-    getOccupiedDays(p).forEach((d, i) => {
-      if (!dayMap[d]) dayMap[d] = [];
-      dayMap[d].push({p, isStart: i === 0});
-    });
-  });
-
-  let html = calHeader();
-
-  WEEKS.forEach(week => {
-    html += `<div class="wk-label">${week.label}<span class="sub">${week.sub}</span></div>`;
-
-    week.days.forEach((day, dIdx) => {
-      const cls = dayClass(day, dIdx);
-      let inner = '';
-
-      if (day !== null) {
-        inner += `<div class="day-num">${day}${HOLIDAYS[day]?`<span class="hol-name">${HOLIDAYS[day]}</span>`:''}</div>`;
-
-        (dayMap[day] || []).forEach(({p, isStart}) => {
-          const asgn   = assignments[p.id] || {};
-          const status = asgn.status || 'unassigned';
-          if (isStart) {
-            const course = getCourse(p.courseId);
-            const inst   = asgn.instructor || '未割当';
-            inner += `<div class="cb s-${status}"
-              onclick="openModal('${p.id}')"
-              title="${course?course.desc:''} | ${p.days}日間 | ${inst}">
-              <span class="cb-id">${p.courseId}</span>
-              <span class="cb-info">${inst}</span>
-            </div>`;
-          } else {
-            inner += `<div class="cont-bar" style="background:${org?org.color:'#999'}"></div>`;
-          }
-        });
-      }
-
-      html += `<div class="${cls}">${inner}</div>`;
-    });
-  });
-
-  document.getElementById('org-cal').innerHTML = html;
+  renderCalendarGrid('org-cal', currentOrg, false);
 }
 
 function selectOrg(id) { currentOrg = id; renderOrgView(); }
 
-// ── モーダル ─────────────────────────────────────────
+// ── モーダル ──────────────────────────────────────────
 function openModal(pid) {
   const p = placements.find(x => x.id === pid);
   if (!p) return;
@@ -480,14 +547,15 @@ function openModal(pid) {
 
   modalPid = pid;
   document.getElementById('modal-title').textContent = `${p.courseId} — ${org?org.label:'?'}`;
-  document.getElementById('modal-sub').textContent   = `${course?course.desc:''} | ${p.days}日間 | 4/${p.start} 〜 4/${endDay}`;
+  document.getElementById('modal-sub').textContent =
+    `${course?course.desc:''} | ${p.days}日間 | 4/${p.start} 〜 4/${endDay}`;
 
   const insts = org ? org.instructors : [];
   document.getElementById('f-instructor').innerHTML =
     `<option value="">— 未選択 —</option>` +
     insts.map(i => `<option value="${i}"${asgn.instructor===i?' selected':''}>${i}</option>`).join('');
   document.getElementById('f-status').value = asgn.status || 'unassigned';
-  document.getElementById('f-notes').value  = asgn.notes || '';
+  document.getElementById('f-notes').value  = asgn.notes  || '';
   document.getElementById('modal-overlay').style.display = 'flex';
 }
 
@@ -522,22 +590,18 @@ function deletePlacement() {
   if (document.getElementById('view-org').classList.contains('active')) renderOrgView();
 }
 
-// ── YAML 生成 ────────────────────────────────────────
+// ── YAML 生成 ─────────────────────────────────────────
 function generateYAML() {
-  const lines = [];
-  lines.push('month: "2026-04"');
-  lines.push('holidays:');
+  const lines = ['month: "2026-04"', 'holidays:'];
   Object.entries(HOLIDAYS).forEach(([d, name]) => {
     lines.push(`  - date: "2026-04-${String(d).padStart(2,'0')}"  # ${name}`);
   });
   lines.push('schedules:');
 
-  const sorted = [...placements].sort((a, b) => a.start !== b.start ? a.start - b.start : a.org.localeCompare(b.org));
-
-  if (sorted.length === 0) {
-    lines.push('  []  # まだスケジュールが登録されていません');
-    return lines.join('\n');
-  }
+  const sorted = [...placements].sort((a, b) =>
+    a.start !== b.start ? a.start - b.start : a.org.localeCompare(b.org)
+  );
+  if (sorted.length === 0) { lines.push('  []'); return lines.join('\n'); }
 
   sorted.forEach(p => {
     const asgn     = assignments[p.id] || {};
@@ -546,9 +610,7 @@ function generateYAML() {
     const endDay   = occupied[occupied.length - 1];
     const sd  = `2026-04-${String(p.start).padStart(2,'0')}`;
     const ed  = endDay ? `2026-04-${String(endDay).padStart(2,'0')}` : sd;
-    const yid = `${sd}-${p.courseId}-${p.org}`;
-
-    lines.push(`  - id: "${yid}"`);
+    lines.push(`  - id: "${sd}-${p.courseId}-${p.org}"`);
     lines.push(`    org: "${p.org}"`);
     lines.push(`    course: "${p.courseId}"`);
     if (course) lines.push(`    version: "${course.ver}"`);
@@ -559,13 +621,10 @@ function generateYAML() {
     lines.push(`    status: "${asgn.status || 'unassigned'}"`);
     lines.push(`    notes: "${(asgn.notes || '').replace(/"/g, '\\"')}"`);
   });
-
   return lines.join('\n');
 }
 
-function renderYAML() {
-  document.getElementById('yaml-pre').textContent = generateYAML();
-}
+function renderYAML() { document.getElementById('yaml-pre').textContent = generateYAML(); }
 
 function copyYAML() {
   navigator.clipboard.writeText(generateYAML()).then(() => showToast('クリップボードにコピーしました'));
@@ -574,21 +633,19 @@ function copyYAML() {
 function downloadYAML() {
   const blob = new Blob([generateYAML()], {type: 'text/yaml'});
   const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url; a.download = 'master.yaml'; a.click();
+  const a    = Object.assign(document.createElement('a'), {href: url, download: 'master.yaml'});
+  a.click();
   URL.revokeObjectURL(url);
 }
 
-// ── Toast ────────────────────────────────────────────
+// ── Toast ─────────────────────────────────────────────
 function showToast(msg) {
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = msg;
+  const t = Object.assign(document.createElement('div'), {className: 'toast', textContent: msg});
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 3000);
 }
 
-// ── 初期化 ───────────────────────────────────────────
+// ── 初期化 ────────────────────────────────────────────
 renderAdminView();
 </script>
 </body>
