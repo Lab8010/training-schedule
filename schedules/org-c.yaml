@@ -1,0 +1,19 @@
+org: "org-c"
+month: "2026-04"
+schedules:
+  - course: "RH294"
+    version: "v9.0"
+    duration_days: 4
+    start_date: "2026-04-14"
+    end_date: "2026-04-17"
+    instructor: "講師C1"
+    status: "proposed"
+    notes: ""
+  - course: "DO370"
+    version: "v1.2"
+    duration_days: 3
+    start_date: "2026-04-21"
+    end_date: "2026-04-23"
+    instructor: "講師C2"
+    status: "confirmed"
+    notes: ""

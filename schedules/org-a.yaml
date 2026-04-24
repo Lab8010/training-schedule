@@ -1,0 +1,19 @@
+org: "org-a"
+month: "2026-04"
+schedules:
+  - course: "RH199"
+    version: "v10.0"
+    duration_days: 5
+    start_date: "2026-04-06"
+    end_date: "2026-04-10"
+    instructor: "講師A1"
+    status: "confirmed"
+    notes: ""
+  - course: "RH124"
+    version: "v10.0"
+    duration_days: 5
+    start_date: "2026-04-13"
+    end_date: "2026-04-17"
+    instructor: "講師A2"
+    status: "proposed"
+    notes: "日程調整中"

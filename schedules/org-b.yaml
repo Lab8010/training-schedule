@@ -1,0 +1,19 @@
+org: "org-b"
+month: "2026-04"
+schedules:
+  - course: "DO180"
+    version: "v4.14"
+    duration_days: 4
+    start_date: "2026-04-07"
+    end_date: "2026-04-10"
+    instructor: "講師B1"
+    status: "confirmed"
+    notes: ""
+  - course: "DO280"
+    version: "v4.14"
+    duration_days: 4
+    start_date: "2026-04-20"
+    end_date: "2026-04-23"
+    instructor: ""
+    status: "unassigned"
+    notes: ""
