@@ -113,6 +113,12 @@
     .export-pre { background: #0f172a; color: #e2e8f0; padding: 16px 20px; border-radius: 8px; font-family: 'Cascadia Code', 'Fira Code', 'Courier New', monospace; font-size: 12px; line-height: 1.7; white-space: pre; overflow-x: auto; border: 1px solid #1e293b; }
 
     .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 20px; border-radius: 8px; z-index: 999; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); pointer-events: none; }
+
+    /* Month navigation */
+    .month-nav { background: white; border-bottom: 1px solid #e2e8f0; padding: 8px 20px; display: flex; align-items: center; justify-content: center; gap: 16px; }
+    .month-nav-label { font-size: 15px; font-weight: 700; color: #1e293b; min-width: 160px; text-align: center; }
+    .month-nav .btn { padding: 5px 16px; font-size: 12px; }
+    .month-nav .btn:disabled { opacity: 0.3; cursor: not-allowed; filter: none; }
   </style>
 </head>
 <body>
@@ -129,6 +135,12 @@
   <div class="tab active" data-view="admin" data-i18n="tabAdmin">Admin ビュー</div>
   <div class="tab" data-view="org" data-i18n="tabOrg">組織別ビュー</div>
   <div class="tab" data-view="export" data-i18n="tabExport">エクスポート</div>
+</div>
+
+<div class="month-nav" id="month-nav">
+  <button class="btn btn-ghost" id="prev-month-btn" onclick="prevMonth()">← 前月</button>
+  <span class="month-nav-label" id="month-nav-label">2026年 4月</span>
+  <button class="btn btn-ghost" id="next-month-btn" onclick="nextMonth()">翌月 →</button>
 </div>
 
 <!-- Admin View -->
@@ -234,6 +246,8 @@ const I18N = {
     toastAdded:  'をライブラリに追加しました',
     toastDupId:  'は既に存在します',
     toastNeedId: 'コースIDと日数を入力してください',
+    prevMonth:   '← 前月',
+    nextMonth:   '翌月 →',
   },
   en: {
     appTitle: 'Training Schedule Manager',
@@ -276,6 +290,8 @@ const I18N = {
     toastAdded:  'added to library',
     toastDupId:  'already exists',
     toastNeedId: 'Course ID and days are required',
+    prevMonth:   '← Prev',
+    nextMonth:   'Next →',
   },
 };
 
@@ -287,10 +303,41 @@ function toggleLang() {
   document.documentElement.lang = currentLang;
   applyI18nAttrs();
   document.getElementById('f-status').innerHTML = statusOptsHTML();
+  updateMonthNav();
   const activeView = document.querySelector('.tab.active')?.dataset.view;
   if (activeView === 'admin')  renderAdminView();
   if (activeView === 'org')    renderOrgView();
   if (activeView === 'export') renderExport();
+}
+
+// ── 月ナビゲーション ───────────────────────────────────────
+function updateMonthNav() {
+  const [y, m] = currentMonth.split('-');
+  const mName  = t('monthNames')[parseInt(m) - 1];
+  document.getElementById('month-nav-label').textContent =
+    currentLang === 'ja' ? `${y}年 ${mName}` : `${mName} ${y}`;
+  document.getElementById('prev-month-btn').textContent = t('prevMonth');
+  document.getElementById('next-month-btn').textContent = t('nextMonth');
+  const idx = MONTHS.indexOf(currentMonth);
+  document.getElementById('prev-month-btn').disabled = idx === 0;
+  document.getElementById('next-month-btn').disabled = idx === MONTHS.length - 1;
+}
+
+function prevMonth() {
+  const idx = MONTHS.indexOf(currentMonth);
+  if (idx > 0) { currentMonth = MONTHS[idx - 1]; onMonthChange(); }
+}
+
+function nextMonth() {
+  const idx = MONTHS.indexOf(currentMonth);
+  if (idx < MONTHS.length - 1) { currentMonth = MONTHS[idx + 1]; onMonthChange(); }
+}
+
+function onMonthChange() {
+  updateMonthNav();
+  const view = document.querySelector('.tab.active')?.dataset.view;
+  if (view === 'admin') renderAdminView();
+  if (view === 'org')   renderOrgView();
 }
 
 function applyI18nAttrs() {
@@ -386,6 +433,9 @@ const WEEKS = generateWeeks();
 const DOW   = ['月','火','水','木','金','土','日'];
 
 // ── 状態 ──────────────────────────────────────────────────
+const MONTHS = ['2026-04','2026-05','2026-06','2026-07','2026-08','2026-09','2026-10','2026-11','2026-12'];
+let currentMonth = '2026-04';
+
 let placements   = [];
 let assignments  = {};
 let nextId       = 1;
@@ -456,6 +506,7 @@ document.getElementById('tab-bar').addEventListener('click', e => {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   tab.classList.add('active');
   document.getElementById(`view-${view}`).classList.add('active');
+  document.getElementById('month-nav').style.display = view === 'export' ? 'none' : 'flex';
   if (view === 'export') renderExport();
   if (view === 'org')    renderOrgView();
   if (view === 'admin')  renderAdminView();
@@ -547,15 +598,11 @@ function renderCalendarGrid(elId, orgFilter, isAdmin) {
     ).join('')}
   </div>`;
 
-  let prevMonth = null;
+  const monthWeeks = WEEKS.map((w, i) => ({...w, globalIdx: i}))
+                          .filter(w => w.month === currentMonth);
 
-  WEEKS.forEach((week, wIdx) => {
-    if (week.month !== prevMonth) {
-      prevMonth = week.month;
-      const mName = t('monthNames')[week.monthNum - 1];
-      html += `<div class="month-header-div">${week.month.slice(0,4)}年 ${mName}</div>`;
-    }
-
+  monthWeeks.forEach(week => {
+    const wIdx = week.globalIdx;
     const {segments, laneOf, laneCount} = computeWeekLanes(wIdx, orgFilter);
     const totalRows = 1 + Math.max(laneCount, 1);
     const cnt  = placements.filter(p => week.days.includes(p.start)).length;
@@ -853,6 +900,7 @@ function showToast(msg) {
 
 // ── 初期化 ─────────────────────────────────────────────────
 document.getElementById('f-status').innerHTML = statusOptsHTML();
+updateMonthNav();
 renderAdminView();
 </script>
 </body>
