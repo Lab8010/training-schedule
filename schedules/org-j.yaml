@@ -1,4 +1,4 @@
-org: "org-b"
+org: "org-j"
 month: "2026-04"
 schedules:
   - course: "DO180"
@@ -6,7 +6,7 @@ schedules:
     duration_days: 4
     start_date: "2026-04-07"
     end_date: "2026-04-10"
-    instructor: "講師B1"
+    instructor: "Instructor-MS"
     status: "confirmed"
     notes: ""
   - course: "DO280"

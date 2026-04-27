@@ -1,12 +1,12 @@
-org: "org-c"
+org: "org-i"
 month: "2026-04"
 schedules:
-  - course: "RH294"
+  - course: "AU294"
     version: "v9.0"
     duration_days: 4
     start_date: "2026-04-14"
     end_date: "2026-04-17"
-    instructor: "講師C1"
+    instructor: "Instructor-SU"
     status: "proposed"
     notes: ""
   - course: "DO370"
@@ -14,6 +14,6 @@ schedules:
     duration_days: 3
     start_date: "2026-04-21"
     end_date: "2026-04-23"
-    instructor: "講師C2"
+    instructor: "Instructor-SU"
     status: "confirmed"
     notes: ""
