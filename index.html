@@ -211,6 +211,16 @@
       <h2 id="modal-title"></h2>
       <div class="sub" id="modal-sub"></div>
     </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 12px">
+      <div class="form-row">
+        <label data-i18n="startTimeLabel">Start Time</label>
+        <input type="text" id="f-starttime" value="09:30 AM" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:13px">
+      </div>
+      <div class="form-row">
+        <label data-i18n="endTimeLabel">End Time</label>
+        <input type="text" id="f-endtime" value="05:30 PM" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:13px">
+      </div>
+    </div>
     <div class="form-row">
       <label data-i18n="publicClass">公開クラス</label>
       <select id="f-public">
@@ -219,7 +229,11 @@
       </select>
     </div>
     <div class="form-row">
-      <label data-i18n="instructor">担当講師</label>
+      <label data-i18n="trainerRhnId">Trainer RHN ID</label>
+      <input type="text" id="f-trainerrhnid" placeholder="例: user@redhat.com" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:13px">
+    </div>
+    <div class="form-row">
+      <label data-i18n="instructor">Trainer Name</label>
       <select id="f-instructor"></select>
     </div>
     <div class="form-row">
@@ -227,7 +241,7 @@
       <select id="f-status"></select>
     </div>
     <div class="form-row">
-      <label data-i18n="notes">メモ</label>
+      <label data-i18n="notes">Comments</label>
       <textarea id="f-notes"></textarea>
     </div>
     <div class="modal-actions">
@@ -286,8 +300,12 @@ const I18N = {
     toastAdded:  'をライブラリに追加しました',
     toastDupId:  'は既に存在します',
     toastNeedId: 'コースIDと日数を入力してください',
-    prevMonth:   '← 前月',
-    nextMonth:   '翌月 →',
+    prevMonth:    '← 前月',
+    nextMonth:    '翌月 →',
+    startTimeLabel:'Start Time',
+    endTimeLabel:  'End Time',
+    trainerRhnId:  'Trainer RHN ID',
+    unavailable:   '割り当て不可',
     publicClass: '公開クラス',
     publicY:     'Y — 一般公開クラス',
     publicN:     'N — 個社開催クラス',
@@ -340,8 +358,12 @@ const I18N = {
     toastAdded:  'added to library',
     toastDupId:  'already exists',
     toastNeedId: 'Course ID and days are required',
-    prevMonth:   '← Prev',
-    nextMonth:   'Next →',
+    prevMonth:    '← Prev',
+    nextMonth:    'Next →',
+    startTimeLabel:'Start Time',
+    endTimeLabel:  'End Time',
+    trainerRhnId:  'Trainer RHN ID',
+    unavailable:   'Unavailable',
     publicClass: 'Public Class',
     publicY:     'Y — Public / Open Enrollment',
     publicN:     'N — Private / On-site',
@@ -453,7 +475,34 @@ const HOLIDAYS = {
 };
 
 // ── 週生成 (Apr–Dec 2026) ──────────────────────────────────
-function fmtDate(d) { return d.toISOString().slice(0, 10); }
+function fmtDate(d) {
+  const y  = d.getFullYear();
+  const m  = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dd}`;
+}
+
+function toMMDDYYYY(s) {
+  if (!s) return '';
+  const [y, m, d] = s.split('-');
+  return `${m}/${d}/${y}`;
+}
+
+function fromMMDDYYYY(s) {
+  if (!s) return '';
+  const str = String(s).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+  const p = str.split('/');
+  if (p.length === 3) return `${p[2].padStart(4,'0')}-${p[0].padStart(2,'0')}-${p[1].padStart(2,'0')}`;
+  return str;
+}
+
+function calcDuration(startDate, endDate) {
+  if (!startDate || !endDate) return 1;
+  const s = new Date(startDate + 'T00:00:00');
+  const e = new Date(endDate   + 'T00:00:00');
+  return Math.max(1, Math.round((e - s) / 86400000) + 1);
+}
 
 function dateSub(s) {
   if (!s) return '';
@@ -768,8 +817,8 @@ function handleDrop(day) {
   const course = getCourse(dragCourseId);
   if (!course) return;
   const id = `p${nextId++}`;
-  placements.push({id, courseId: dragCourseId, start: day, days: course.days, org: ORGS[0].id, isPublic: 'N'});
-  assignments[id] = {instructor: '', status: 'unassigned', notes: ''};
+  placements.push({id, courseId: dragCourseId, start: day, days: course.days, org: ORGS[0].id, isPublic: 'N', startTime: '09:30 AM', endTime: '05:30 PM'});
+  assignments[id] = {instructor: '', trainerRhnId: '', status: 'unassigned', notes: ''};
   dragCourseId = null;
   renderAdminView();
 }
@@ -805,12 +854,16 @@ function openModal(pid) {
     `${course ? course.desc : ''} | ${p.days}${t('days')} | ${dateSub(p.start)} 〜 ${dateSub(endDay)}`;
 
   const insts = org ? org.instructors : [];
+  const currentInst = asgn.instructor || '';
   document.getElementById('f-instructor').innerHTML =
     `<option value="">${t('unassigned')}</option>` +
-    insts.map(i => `<option value="${i}"${asgn.instructor===i?' selected':''}>${i}</option>`).join('');
-  if (!asgn.instructor) document.getElementById('f-instructor').value = '';
+    `<option value="__unavail__"${currentInst==='__unavail__'?' selected':''}>${t('unavailable')}</option>` +
+    insts.map(i => `<option value="${i}"${currentInst===i?' selected':''}>${i}</option>`).join('');
 
-  document.getElementById('f-public').value      = p.isPublic || 'N';
+  document.getElementById('f-starttime').value   = p.startTime || '09:30 AM';
+  document.getElementById('f-endtime').value     = p.endTime   || '05:30 PM';
+  document.getElementById('f-public').value      = p.isPublic  || 'N';
+  document.getElementById('f-trainerrhnid').value= asgn.trainerRhnId || '';
   document.getElementById('f-status').innerHTML  = statusOptsHTML(asgn.status || 'unassigned');
   document.getElementById('f-notes').value       = asgn.notes || '';
   document.getElementById('f-notes').placeholder = t('notesPh');
@@ -829,11 +882,16 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
 function saveAssignment() {
   if (!modalPid) return;
   const p = placements.find(x => x.id === modalPid);
-  if (p) p.isPublic = document.getElementById('f-public').value;
+  if (p) {
+    p.isPublic  = document.getElementById('f-public').value;
+    p.startTime = document.getElementById('f-starttime').value;
+    p.endTime   = document.getElementById('f-endtime').value;
+  }
   assignments[modalPid] = {
-    instructor: document.getElementById('f-instructor').value,
-    status:     document.getElementById('f-status').value,
-    notes:      document.getElementById('f-notes').value,
+    instructor:    document.getElementById('f-instructor').value,
+    trainerRhnId:  document.getElementById('f-trainerrhnid').value,
+    status:        document.getElementById('f-status').value,
+    notes:         document.getElementById('f-notes').value,
   };
   closeModal();
   renderAdminView();
@@ -873,6 +931,8 @@ function buildScheduleList() {
     const course   = getCourse(p.courseId);
     const occupied = getOccupiedDays(p);
     const endDay   = occupied[occupied.length - 1] || p.start;
+    const trainerDisplay = asgn.instructor === '__unavail__'
+      ? '割り当て不可' : (asgn.instructor || '未割り当て');
     return {
       id: `${p.start}-${p.courseId}-${p.org}`,
       org: p.org,
@@ -880,11 +940,18 @@ function buildScheduleList() {
       course: p.courseId,
       course_desc: course ? course.desc : '',
       version: course ? course.ver : '',
-      duration_days: p.days,
+      business_days: p.days,
+      duration: calcDuration(p.start, endDay),
       start_date: p.start,
       end_date: endDay,
+      start_date_fmt: toMMDDYYYY(p.start),
+      end_date_fmt: toMMDDYYYY(endDay),
+      start_time: p.startTime || '09:30 AM',
+      end_time: p.endTime   || '05:30 PM',
       is_public: p.isPublic || 'N',
+      trainer_rhn_id: asgn.trainerRhnId || '',
       instructor: asgn.instructor || '',
+      trainer_display: trainerDisplay,
       status: asgn.status || 'unassigned',
       notes: asgn.notes || '',
     };
@@ -904,10 +971,14 @@ function generateYAML() {
     lines.push(`    org: "${s.org}"`);
     lines.push(`    course: "${s.course}"`);
     if (s.version) lines.push(`    version: "${s.version}"`);
-    lines.push(`    duration_days: ${s.duration_days}`);
+    lines.push(`    business_days: ${s.business_days}`);
+    lines.push(`    duration: ${s.duration}`);
     lines.push(`    start_date: "${s.start_date}"`);
     lines.push(`    end_date: "${s.end_date}"`);
+    lines.push(`    start_time: "${s.start_time}"`);
+    lines.push(`    end_time: "${s.end_time}"`);
     lines.push(`    is_public: "${s.is_public}"`);
+    lines.push(`    trainer_rhn_id: "${s.trainer_rhn_id}"`);
     lines.push(`    instructor: "${s.instructor}"`);
     lines.push(`    status: "${s.status}"`);
     lines.push(`    notes: "${s.notes.replace(/"/g, '\\"')}"`);
@@ -934,8 +1005,10 @@ function generateXML() {
   buildScheduleList().forEach(s => {
     lines.push(
       `    <schedule id="${esc(s.id)}" org="${esc(s.org)}" course="${esc(s.course)}" version="${esc(s.version)}"`,
-      `      durationDays="${s.duration_days}" startDate="${s.start_date}" endDate="${s.end_date}"`,
-      `      isPublic="${s.is_public}" instructor="${esc(s.instructor)}" status="${esc(s.status)}" notes="${esc(s.notes)}"/>`
+      `      businessDays="${s.business_days}" duration="${s.duration}" startDate="${s.start_date}" endDate="${s.end_date}"`,
+      `      startTime="${esc(s.start_time)}" endTime="${esc(s.end_time)}"`,
+      `      isPublic="${s.is_public}" trainerRhnId="${esc(s.trainer_rhn_id)}" instructor="${esc(s.instructor)}"`,
+      `      status="${esc(s.status)}" notes="${esc(s.notes)}"/>`
     );
   });
   lines.push('  </schedules>', '</scheduleData>');
@@ -960,36 +1033,41 @@ function downloadExport() {
 
 // ── xlsx エクスポート ──────────────────────────────────────
 function exportXLSX() {
+  // Column order as specified (+ 組織/公開クラス at end for round-trip import)
   const headers = [
-    '組織', '開始日', '終了日', '公開クラス',
-    'コースID', 'コース名', 'バージョン', '日数',
-    '担当講師', 'ステータス', 'メモ',
+    'Training SKU', 'Duration', 'Version',
+    'Start Date', 'End Date', 'Start Time', 'End Time',
+    'Trainer RHN ID', 'Trainer Name', 'Comments',
+    '組織', '公開クラス',
   ];
   const note = [
-    '', '', '', '',
-    '', '', '', '',
-    '← 記入', '← 記入 (confirmed/proposed/unassigned)', '← 記入',
+    '', '', '',
+    '(mm/dd/yyyy)', '(mm/dd/yyyy)', '', '',
+    '← 記入', '← 記入', '← 記入',
+    '', '',
   ];
 
   const rows = buildScheduleList().map(s => [
-    s.org_label,
-    s.start_date,
-    s.end_date,
-    s.is_public,
     s.course,
-    s.course_desc,
+    s.duration,
     s.version,
-    s.duration_days,
-    s.instructor,
-    s.status,
+    s.start_date_fmt,
+    s.end_date_fmt,
+    s.start_time,
+    s.end_time,
+    s.trainer_rhn_id,
+    s.trainer_display,
     s.notes,
+    s.org_label,
+    s.is_public,
   ]);
 
   const ws = XLSX.utils.aoa_to_sheet([headers, note, ...rows]);
   ws['!cols'] = [
-    {wch:8},{wch:12},{wch:12},{wch:10},
-    {wch:10},{wch:42},{wch:10},{wch:6},
-    {wch:18},{wch:16},{wch:30},
+    {wch:14},{wch:10},{wch:10},
+    {wch:14},{wch:14},{wch:12},{wch:12},
+    {wch:24},{wch:20},{wch:32},
+    {wch:8},{wch:8},
   ];
 
   const wb = XLSX.utils.book_new();
@@ -1009,9 +1087,15 @@ function handleXLSXImport(file) {
       const ws   = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
 
-      // Skip header row(s): find first row where col0 matches an org label
-      const orgLabels = ORGS.map(o => o.label);
-      const dataRows  = rows.filter(r => orgLabels.includes(String(r[0]).trim()));
+      // New column order: Training SKU(0), Duration(1), Version(2),
+      // Start Date(3), End Date(4), Start Time(5), End Time(6),
+      // Trainer RHN ID(7), Trainer Name(8), Comments(9), 組織(10), 公開クラス(11)
+      // Skip header/note rows (rows where col0 is not a course-like value)
+      const dataRows = rows.filter((r, i) => {
+        if (i < 2) return false; // skip header + note row
+        const sku = String(r[0] || '').trim();
+        return sku.length > 0 && sku !== 'Training SKU';
+      });
 
       if (dataRows.length === 0) { setImportResult(t('xlsxEmpty'), true); return; }
 
@@ -1021,32 +1105,39 @@ function handleXLSXImport(file) {
       let   count = 0;
 
       dataRows.forEach(row => {
-        const orgLabel  = String(row[0] || '').trim();
-        const startRaw  = row[1];
-        const isPublic  = String(row[3] || 'N').trim().toUpperCase() === 'Y' ? 'Y' : 'N';
-        const courseId  = String(row[4] || '').trim().toUpperCase();
-        const version   = String(row[6] || '').trim();
-        const days      = parseInt(row[7]) || 1;
-        const instructor= String(row[8] || '').trim();
-        const status    = String(row[9] || 'unassigned').trim();
-        const notes     = String(row[10] || '').trim();
+        const courseId     = String(row[0]  || '').trim().toUpperCase();
+        const version      = String(row[2]  || '').trim();
+        const startRaw     = row[3];
+        const startTime    = String(row[5]  || '09:30 AM').trim();
+        const endTime      = String(row[6]  || '05:30 PM').trim();
+        const trainerRhnId = String(row[7]  || '').trim();
+        const trainerName  = String(row[8]  || '').trim();
+        const notes        = String(row[9]  || '').trim();
+        const orgLabel     = String(row[10] || '').trim();
+        const isPublic     = String(row[11] || 'N').trim().toUpperCase() === 'Y' ? 'Y' : 'N';
 
-        if (!orgLabel || !courseId) return;
+        // Trainer Name: convert display values back to internal values
+        let instructor = trainerName;
+        if (trainerName === '未割り当て' || trainerName === '') instructor = '';
+        if (trainerName === '割り当て不可' || trainerName === 'Unavailable') instructor = '__unavail__';
 
-        const startDate = cellToDateStr(startRaw);
+        if (!courseId) return;
+
+        const startDate = fromMMDDYYYY(cellToDateStr(startRaw));
         if (!startDate || !allDays().includes(startDate)) return;
 
-        const org = ORGS.find(o => o.label === orgLabel);
+        const org = orgLabel ? ORGS.find(o => o.label === orgLabel) : ORGS[0];
         if (!org) return;
 
         // Add to COURSE_LIB if new
         if (!getCourse(courseId)) {
-          COURSE_LIB.push({id:courseId, ver:version||'v1.0', days, desc:courseId});
+          COURSE_LIB.push({id:courseId, ver:version||'v1.0', days:1, desc:courseId});
         }
+        const days = getCourse(courseId)?.days || 1;
 
         const id = `p${newId++}`;
-        newPlacements.push({id, courseId, start:startDate, days, org:org.id, isPublic});
-        newAssignments[id] = {instructor, status, notes};
+        newPlacements.push({id, courseId, start:startDate, days, org:org.id, isPublic, startTime, endTime});
+        newAssignments[id] = {instructor, trainerRhnId, status:'unassigned', notes};
         count++;
       });
 
