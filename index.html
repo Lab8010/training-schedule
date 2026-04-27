@@ -22,6 +22,33 @@
 
     .view { display: none; padding: 16px 20px; }
     .view.active { display: block; }
+
+    /* ── Admin split layout ──────────────────────────────── */
+    #view-admin { padding: 0; }
+    .admin-layout { display: flex; align-items: flex-start; }
+
+    .course-panel {
+      width: 156px; min-width: 156px; flex-shrink: 0;
+      align-self: flex-start; position: sticky; top: 0;
+      max-height: 100vh; overflow-y: auto;
+      padding: 14px 10px 20px 14px;
+      background: #f0f2f5; border-right: 2px solid #dee2e8;
+    }
+    .course-panel .section-title { margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lib-hint { font-size: 10px; color: #94a3b8; margin-bottom: 10px; }
+    .course-panel .course-lib {
+      display: flex; flex-direction: column; gap: 5px;
+      padding: 0; border: none; box-shadow: none; background: transparent; margin-bottom: 0;
+    }
+    .course-panel .course-card { display: block; }
+    .course-panel .course-card .cmeta { display: block; font-size: 10px; margin-top: 1px; }
+    .course-panel .course-add-form {
+      flex-direction: column; gap: 5px; padding-top: 10px; margin-top: 6px;
+    }
+    .course-panel .course-add-form input { width: 100% !important; }
+    .course-panel .course-add-form button { width: 100%; justify-content: center; }
+
+    .calendar-panel { flex: 1; min-width: 0; padding: 14px 16px; }
     .section-title { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
 
     .course-lib { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px; background: white; border-radius: 8px; margin-bottom: 14px; border: 1px solid #e0e0e0; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
@@ -166,10 +193,19 @@
 
 <!-- Admin View -->
 <div id="view-admin" class="view active">
-  <div class="section-title" data-i18n="libTitle">コースライブラリ — ドラッグしてカレンダーへ配置</div>
-  <div class="course-lib" id="course-lib"></div>
-  <div class="section-title" data-i18n="calTitle">スケジュールカレンダー（最大4クラス/週）</div>
-  <div class="cal-wrapper" id="admin-cal"></div>
+  <div class="admin-layout">
+    <!-- Left: Course Library Panel -->
+    <div class="course-panel">
+      <div class="section-title" data-i18n="libTitle">コースライブラリ</div>
+      <div class="lib-hint" data-i18n="libHint">↓ ドラッグして配置</div>
+      <div class="course-lib" id="course-lib"></div>
+    </div>
+    <!-- Right: Calendar Panel -->
+    <div class="calendar-panel">
+      <div class="section-title" data-i18n="calTitle">スケジュールカレンダー（最大4クラス/週）</div>
+      <div class="cal-wrapper" id="admin-cal"></div>
+    </div>
+  </div>
 </div>
 
 <!-- Org View -->
@@ -272,7 +308,8 @@ const I18N = {
     tabAdmin: 'Admin ビュー',
     tabOrg: '組織別ビュー',
     tabExport: 'ファイル操作',
-    libTitle: 'コースライブラリ — ドラッグしてカレンダーへ配置',
+    libTitle: 'コースライブラリ',
+    libHint:  '↓ ドラッグして配置',
     calTitle: 'スケジュールカレンダー（最大4クラス/週）',
     weekCol: '週',
     instructor: '担当講師',
@@ -331,7 +368,8 @@ const I18N = {
     tabAdmin: 'Admin View',
     tabOrg: 'Org View',
     tabExport: 'File Ops',
-    libTitle: 'Course Library — Drag to Calendar',
+    libTitle: 'Course Library',
+    libHint:  '↓ Drag to calendar',
     calTitle: 'Schedule Calendar (max 4 classes/week)',
     weekCol: 'Wk',
     instructor: 'Instructor',
