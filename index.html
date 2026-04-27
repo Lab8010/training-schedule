@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Training Schedule Manager — 2026</title>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; background: #f0f2f5; color: #333; min-height: 100vh; }
@@ -114,6 +115,19 @@
 
     .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 20px; border-radius: 8px; z-index: 999; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); pointer-events: none; }
 
+    /* Public class badge */
+    .pub-badge { display:inline-block; font-size:9px; font-weight:700; padding:1px 4px; border-radius:3px; margin-left:3px; vertical-align:middle; }
+    .pub-y { background:#d1fae5; color:#065f46; }
+    .pub-n { background:#f1f5f9; color:#64748b; }
+
+    /* Excel section */
+    .excel-section { margin-top:18px; border-top:1px solid #e2e8f0; padding-top:14px; }
+    .excel-section .section-title { margin-bottom:10px; }
+    .excel-toolbar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .import-drop { margin-top:10px; border:2px dashed #cbd5e1; border-radius:8px; padding:16px; text-align:center; color:#94a3b8; font-size:12px; cursor:pointer; transition:all 0.2s; }
+    .import-drop:hover, .import-drop.drag-over { border-color:#3b82f6; background:#eff6ff; color:#3b82f6; }
+    .import-result { margin-top:8px; font-size:12px; color:#475569; }
+
     /* Month navigation */
     .month-nav { background: white; border-bottom: 1px solid #e2e8f0; padding: 8px 20px; display: flex; align-items: center; justify-content: center; gap: 16px; }
     .month-nav-label { font-size: 15px; font-weight: 700; color: #1e293b; min-width: 160px; text-align: center; }
@@ -169,6 +183,25 @@
     <button class="btn btn-ghost"   onclick="downloadExport()" data-i18n="downloadBtn">ダウンロード</button>
   </div>
   <pre class="export-pre" id="export-pre"></pre>
+
+  <div class="excel-section">
+    <div class="section-title" data-i18n="xlsxSection">Excel (xlsx)</div>
+    <div class="excel-toolbar">
+      <button class="btn btn-primary" onclick="exportXLSX()" data-i18n="xlsxExport">xlsx エクスポート</button>
+      <label class="btn btn-ghost" style="cursor:pointer">
+        <span data-i18n="xlsxImport">xlsx インポート</span>
+        <input type="file" id="xlsx-file-input" accept=".xlsx,.xls" style="display:none" onchange="handleXLSXImport(this.files[0])">
+      </label>
+    </div>
+    <div class="import-drop" id="import-drop"
+      ondragover="event.preventDefault();this.classList.add('drag-over')"
+      ondragleave="this.classList.remove('drag-over')"
+      ondrop="this.classList.remove('drag-over');handleXLSXImport(event.dataTransfer.files[0])"
+      onclick="document.getElementById('xlsx-file-input').click()">
+      <span data-i18n="xlsxDropHint">xlsx ファイルをここにドロップ、またはクリックして選択</span>
+    </div>
+    <div class="import-result" id="import-result"></div>
+  </div>
 </div>
 
 <!-- Modal -->
@@ -177,6 +210,13 @@
     <div class="modal-header">
       <h2 id="modal-title"></h2>
       <div class="sub" id="modal-sub"></div>
+    </div>
+    <div class="form-row">
+      <label data-i18n="publicClass">公開クラス</label>
+      <select id="f-public">
+        <option value="Y" data-i18n="publicY">Y — 一般公開クラス</option>
+        <option value="N" data-i18n="publicN">N — 個社開催クラス</option>
+      </select>
     </div>
     <div class="form-row">
       <label data-i18n="instructor">担当講師</label>
@@ -248,6 +288,16 @@ const I18N = {
     toastNeedId: 'コースIDと日数を入力してください',
     prevMonth:   '← 前月',
     nextMonth:   '翌月 →',
+    publicClass: '公開クラス',
+    publicY:     'Y — 一般公開クラス',
+    publicN:     'N — 個社開催クラス',
+    xlsxSection: 'Excel (xlsx)',
+    xlsxExport:  'xlsx エクスポート',
+    xlsxImport:  'xlsx インポート',
+    xlsxDropHint:'xlsx ファイルをここにドロップ、またはクリックして選択',
+    xlsxImported:'件インポートしました',
+    xlsxEmpty:   'データが見つかりません',
+    xlsxError:   '読み込みエラー: ',
   },
   en: {
     appTitle: 'Training Schedule Manager',
@@ -292,6 +342,16 @@ const I18N = {
     toastNeedId: 'Course ID and days are required',
     prevMonth:   '← Prev',
     nextMonth:   'Next →',
+    publicClass: 'Public Class',
+    publicY:     'Y — Public / Open Enrollment',
+    publicN:     'N — Private / On-site',
+    xlsxSection: 'Excel (xlsx)',
+    xlsxExport:  'Export xlsx',
+    xlsxImport:  'Import xlsx',
+    xlsxDropHint:'Drop xlsx file here or click to select',
+    xlsxImported:'records imported',
+    xlsxEmpty:   'No data found',
+    xlsxError:   'Read error: ',
   },
 };
 
@@ -656,7 +716,7 @@ function renderCalendarGrid(elId, orgFilter, isAdmin) {
           onclick="openModal('${p.id}')"
           title="${escHtml(course?course.desc:'')} | ${p.days}${t('days')}">
           <div class="cb-r1">
-            <span class="cb-id">${p.courseId} · ${p.days}d</span>
+            <span class="cb-id">${p.courseId} · ${p.days}d<span class="pub-badge ${p.isPublic==='Y'?'pub-y':'pub-n'}">${p.isPublic||'N'}</span></span>
             <select class="org-sel-i"
               onclick="event.stopPropagation()"
               onchange="changePlacementOrg('${p.id}',this.value);renderAdminView()">${orgOpts}</select>
@@ -708,7 +768,7 @@ function handleDrop(day) {
   const course = getCourse(dragCourseId);
   if (!course) return;
   const id = `p${nextId++}`;
-  placements.push({id, courseId: dragCourseId, start: day, days: course.days, org: ORGS[0].id});
+  placements.push({id, courseId: dragCourseId, start: day, days: course.days, org: ORGS[0].id, isPublic: 'N'});
   assignments[id] = {instructor: '', status: 'unassigned', notes: ''};
   dragCourseId = null;
   renderAdminView();
@@ -750,6 +810,7 @@ function openModal(pid) {
     insts.map(i => `<option value="${i}"${asgn.instructor===i?' selected':''}>${i}</option>`).join('');
   if (!asgn.instructor) document.getElementById('f-instructor').value = '';
 
+  document.getElementById('f-public').value      = p.isPublic || 'N';
   document.getElementById('f-status').innerHTML  = statusOptsHTML(asgn.status || 'unassigned');
   document.getElementById('f-notes').value       = asgn.notes || '';
   document.getElementById('f-notes').placeholder = t('notesPh');
@@ -767,6 +828,8 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
 
 function saveAssignment() {
   if (!modalPid) return;
+  const p = placements.find(x => x.id === modalPid);
+  if (p) p.isPublic = document.getElementById('f-public').value;
   assignments[modalPid] = {
     instructor: document.getElementById('f-instructor').value,
     status:     document.getElementById('f-status').value,
@@ -813,11 +876,14 @@ function buildScheduleList() {
     return {
       id: `${p.start}-${p.courseId}-${p.org}`,
       org: p.org,
+      org_label: (getOrg(p.org) || {}).label || p.org,
       course: p.courseId,
+      course_desc: course ? course.desc : '',
       version: course ? course.ver : '',
       duration_days: p.days,
       start_date: p.start,
       end_date: endDay,
+      is_public: p.isPublic || 'N',
       instructor: asgn.instructor || '',
       status: asgn.status || 'unassigned',
       notes: asgn.notes || '',
@@ -841,6 +907,7 @@ function generateYAML() {
     lines.push(`    duration_days: ${s.duration_days}`);
     lines.push(`    start_date: "${s.start_date}"`);
     lines.push(`    end_date: "${s.end_date}"`);
+    lines.push(`    is_public: "${s.is_public}"`);
     lines.push(`    instructor: "${s.instructor}"`);
     lines.push(`    status: "${s.status}"`);
     lines.push(`    notes: "${s.notes.replace(/"/g, '\\"')}"`);
@@ -868,7 +935,7 @@ function generateXML() {
     lines.push(
       `    <schedule id="${esc(s.id)}" org="${esc(s.org)}" course="${esc(s.course)}" version="${esc(s.version)}"`,
       `      durationDays="${s.duration_days}" startDate="${s.start_date}" endDate="${s.end_date}"`,
-      `      instructor="${esc(s.instructor)}" status="${esc(s.status)}" notes="${esc(s.notes)}"/>`
+      `      isPublic="${s.is_public}" instructor="${esc(s.instructor)}" status="${esc(s.status)}" notes="${esc(s.notes)}"/>`
     );
   });
   lines.push('  </schedules>', '</scheduleData>');
@@ -889,6 +956,130 @@ function downloadExport() {
   const a    = Object.assign(document.createElement('a'), {href: url, download: `master.${ext}`});
   a.click();
   URL.revokeObjectURL(url);
+}
+
+// ── xlsx エクスポート ──────────────────────────────────────
+function exportXLSX() {
+  const headers = [
+    '組織', '開始日', '終了日', '公開クラス',
+    'コースID', 'コース名', 'バージョン', '日数',
+    '担当講師', 'ステータス', 'メモ',
+  ];
+  const note = [
+    '', '', '', '',
+    '', '', '', '',
+    '← 記入', '← 記入 (confirmed/proposed/unassigned)', '← 記入',
+  ];
+
+  const rows = buildScheduleList().map(s => [
+    s.org_label,
+    s.start_date,
+    s.end_date,
+    s.is_public,
+    s.course,
+    s.course_desc,
+    s.version,
+    s.duration_days,
+    s.instructor,
+    s.status,
+    s.notes,
+  ]);
+
+  const ws = XLSX.utils.aoa_to_sheet([headers, note, ...rows]);
+  ws['!cols'] = [
+    {wch:8},{wch:12},{wch:12},{wch:10},
+    {wch:10},{wch:42},{wch:10},{wch:6},
+    {wch:18},{wch:16},{wch:30},
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Schedule');
+  XLSX.writeFile(wb, 'training-schedule.xlsx');
+  showToast('training-schedule.xlsx をダウンロードしました');
+}
+
+// ── xlsx インポート ────────────────────────────────────────
+function handleXLSXImport(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onerror = () => setImportResult(t('xlsxError') + 'FileReader failure', true);
+  reader.onload = e => {
+    try {
+      const wb   = XLSX.read(new Uint8Array(e.target.result), {type:'array', cellDates:true});
+      const ws   = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+
+      // Skip header row(s): find first row where col0 matches an org label
+      const orgLabels = ORGS.map(o => o.label);
+      const dataRows  = rows.filter(r => orgLabels.includes(String(r[0]).trim()));
+
+      if (dataRows.length === 0) { setImportResult(t('xlsxEmpty'), true); return; }
+
+      const newPlacements  = [];
+      const newAssignments = {};
+      let   newId = nextId;
+      let   count = 0;
+
+      dataRows.forEach(row => {
+        const orgLabel  = String(row[0] || '').trim();
+        const startRaw  = row[1];
+        const isPublic  = String(row[3] || 'N').trim().toUpperCase() === 'Y' ? 'Y' : 'N';
+        const courseId  = String(row[4] || '').trim().toUpperCase();
+        const version   = String(row[6] || '').trim();
+        const days      = parseInt(row[7]) || 1;
+        const instructor= String(row[8] || '').trim();
+        const status    = String(row[9] || 'unassigned').trim();
+        const notes     = String(row[10] || '').trim();
+
+        if (!orgLabel || !courseId) return;
+
+        const startDate = cellToDateStr(startRaw);
+        if (!startDate || !allDays().includes(startDate)) return;
+
+        const org = ORGS.find(o => o.label === orgLabel);
+        if (!org) return;
+
+        // Add to COURSE_LIB if new
+        if (!getCourse(courseId)) {
+          COURSE_LIB.push({id:courseId, ver:version||'v1.0', days, desc:courseId});
+        }
+
+        const id = `p${newId++}`;
+        newPlacements.push({id, courseId, start:startDate, days, org:org.id, isPublic});
+        newAssignments[id] = {instructor, status, notes};
+        count++;
+      });
+
+      placements  = newPlacements;
+      assignments = newAssignments;
+      nextId      = newId;
+
+      renderAdminView();
+      if (document.getElementById('view-export').classList.contains('active')) renderExport();
+      setImportResult(`✅ ${count} ${t('xlsxImported')}`);
+      document.getElementById('xlsx-file-input').value = '';
+    } catch(err) {
+      setImportResult(t('xlsxError') + err.message, true);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function cellToDateStr(val) {
+  if (!val) return '';
+  if (val instanceof Date) return fmtDate(val);
+  if (typeof val === 'number') {
+    return fmtDate(new Date(Math.round((val - 25569) * 86400000)));
+  }
+  const s = String(val).trim();
+  // Accept YYYY-MM-DD or YYYY/MM/DD
+  return s.replace(/\//g, '-');
+}
+
+function setImportResult(msg, isError = false) {
+  const el = document.getElementById('import-result');
+  el.textContent = msg;
+  el.style.color = isError ? '#ef4444' : '#059669';
 }
 
 // ── Toast ──────────────────────────────────────────────────
