@@ -1,385 +1,375 @@
-{
-  "period": "2026-04/2026-12",
-  "holidays": [
-    {
-      "date": "2026-04-29",
-      "name": "昭和の日"
-    },
-    {
-      "date": "2026-05-03",
-      "name": "憲法記念日"
-    },
-    {
-      "date": "2026-05-04",
-      "name": "みどりの日"
-    },
-    {
-      "date": "2026-05-05",
-      "name": "こどもの日"
-    },
-    {
-      "date": "2026-05-06",
-      "name": "振替休日"
-    },
-    {
-      "date": "2026-07-20",
-      "name": "海の日"
-    },
-    {
-      "date": "2026-08-11",
-      "name": "山の日"
-    },
-    {
-      "date": "2026-09-21",
-      "name": "敬老の日"
-    },
-    {
-      "date": "2026-09-23",
-      "name": "秋分の日"
-    },
-    {
-      "date": "2026-10-12",
-      "name": "スポーツの日"
-    },
-    {
-      "date": "2026-11-03",
-      "name": "文化の日"
-    },
-    {
-      "date": "2026-11-23",
-      "name": "勤労感謝の日"
-    }
-  ],
-  "schedules": [
-    {
-      "id": "2026-04-06-DO288-org-j",
-      "org": "org-j",
-      "org_label": "Org-J",
-      "course": "DO288",
-      "course_desc": "OpenShift Dev II: Building & Deploying",
-      "version": "v4.14",
-      "business_days": 4,
-      "duration": 4,
-      "start_date": "2026-04-06",
-      "end_date": "2026-04-09",
-      "start_date_fmt": "04/06/2026",
-      "end_date_fmt": "04/09/2026",
-      "start_time": "09:30 AM",
-      "end_time": "05:30 PM",
-      "is_public": "N",
-      "trainer_rhn_id": "",
-      "trainer": "Instructor-MS",
-      "trainer_display": "Instructor-MS",
-      "status": "confirmed",
-      "notes": ""
-    },
-    {
-      "id": "2026-04-06-RH134-org-j",
-      "org": "org-j",
-      "org_label": "Org-J",
-      "course": "RH134",
-      "course_desc": "System Administration II",
-      "version": "v10.0",
-      "business_days": 5,
-      "duration": 5,
-      "start_date": "2026-04-06",
-      "end_date": "2026-04-10",
-      "start_date_fmt": "04/06/2026",
-      "end_date_fmt": "04/10/2026",
-      "start_time": "09:30 AM",
-      "end_time": "05:30 PM",
-      "is_public": "N",
-      "trainer_rhn_id": "",
-      "trainer": "Instructor-CM",
-      "trainer_display": "Instructor-CM",
-      "status": "confirmed",
-      "notes": ""
-    },
-    {
-      "id": "2026-04-13-DO180-org-j",
-      "org": "org-j",
-      "org_label": "Org-J",
-      "course": "DO180",
-      "course_desc": "OpenShift I: Containers & Kubernetes",
-      "version": "v4.14",
-      "business_days": 4,
-      "duration": 4,
-      "start_date": "2026-04-13",
-      "end_date": "2026-04-16",
-      "start_date_fmt": "04/13/2026",
-      "end_date_fmt": "04/16/2026",
-      "start_time": "09:30 AM",
-      "end_time": "05:30 PM",
-      "is_public": "N",
-      "trainer_rhn_id": "",
-      "trainer": "Instructor-MS",
-      "trainer_display": "Instructor-MS",
-      "status": "confirmed",
-      "notes": ""
-    },
-    {
-      "id": "2026-04-13-RH134-org-j",
-      "org": "org-j",
-      "org_label": "Org-J",
-      "course": "RH134",
-      "course_desc": "System Administration II",
-      "version": "v10.0",
-      "business_days": 5,
-      "duration": 5,
-      "start_date": "2026-04-13",
-      "end_date": "2026-04-17",
-      "start_date_fmt": "04/13/2026",
-      "end_date_fmt": "04/17/2026",
-      "start_time": "09:30 AM",
-      "end_time": "05:30 PM",
-      "is_public": "N",
-      "trainer_rhn_id": "",
-      "trainer": "Instructor-CM",
-      "trainer_display": "Instructor-CM",
-      "status": "unassigned",
-      "notes": ""
-    },
-    {
-      "id": "2026-04-13-DO316-org-r",
-      "org": "org-r",
-      "org_label": "Org-R",
-      "course": "DO316",
-      "course_desc": "Managing Virtual Machines with OpenShift Virt",
-      "version": "v4.16",
-      "business_days": 5,
-      "duration": 5,
-      "start_date": "2026-04-13",
-      "end_date": "2026-04-17",
-      "start_date_fmt": "04/13/2026",
-      "end_date_fmt": "04/17/2026",
-      "start_time": "09:30 AM",
-      "end_time": "05:30 PM",
-      "is_public": "N",
-      "trainer_rhn_id": "",
-      "trainer": "Instructor-YS",
-      "trainer_display": "Instructor-YS",
-      "status": "confirmed",
-      "notes": ""
-    },
-    {
-      "id": "2026-04-13-RH199-org-r",
-      "org": "org-r",
-      "org_label": "Org-R",
-      "course": "RH199",
-      "course_desc": "RHCSA Rapid Track",
-      "version": "v10.0",
-      "business_days": 5,
-      "duration": 5,
-      "start_date": "2026-04-13",
-      "end_date": "2026-04-17",
-      "start_date_fmt": "04/13/2026",
-      "end_date_fmt": "04/17/2026",
-      "start_time": "09:30 AM",
-      "end_time": "05:30 PM",
-      "is_public": "N",
-      "trainer_rhn_id": "",
-      "trainer": "Instructor-FM",
-      "trainer_display": "Instructor-FM",
-      "status": "confirmed",
-      "notes": ""
-    },
-    {
-      "id": "2026-04-20-AU294-org-j",
-      "org": "org-j",
-      "org_label": "Org-J",
-      "course": "AU294",
-      "course_desc": "RHEL Automation with Ansible",
-      "version": "v9.0",
-      "business_days": 4,
-      "duration": 4,
-      "start_date": "2026-04-20",
-      "end_date": "2026-04-23",
-      "start_date_fmt": "04/20/2026",
-      "end_date_fmt": "04/23/2026",
-      "start_time": "09:30 AM",
-      "end_time": "05:30 PM",
-      "is_public": "N",
-      "trainer_rhn_id": "",
-      "trainer": "Instructor-MS",
-      "trainer_display": "Instructor-MS",
-      "status": "confirmed",
-      "notes": ""
-    },
-    {
-      "id": "2026-04-20-DO188-org-r",
-      "org": "org-r",
-      "org_label": "Org-R",
-      "course": "DO188",
-      "course_desc": "OpenShift Dev I: Introduction",
-      "version": "v4.14",
-      "business_days": 3,
-      "duration": 3,
-      "start_date": "2026-04-20",
-      "end_date": "2026-04-22",
-      "start_date_fmt": "04/20/2026",
-      "end_date_fmt": "04/22/2026",
-      "start_time": "09:30 AM",
-      "end_time": "05:30 PM",
-      "is_public": "N",
-      "trainer_rhn_id": "",
-      "trainer": "Instructor-FM",
-      "trainer_display": "Instructor-FM",
-      "status": "confirmed",
-      "notes": ""
-    },
-    {
-      "id": "2026-05-11-RH199-org-j",
-      "org": "org-j",
-      "org_label": "Org-J",
-      "course": "RH199",
-      "course_desc": "RHCSA Rapid Track",
-      "version": "v10.0",
-      "business_days": 5,
-      "duration": 5,
-      "start_date": "2026-05-11",
-      "end_date": "2026-05-15",
-      "start_date_fmt": "05/11/2026",
-      "end_date_fmt": "05/15/2026",
-      "start_time": "09:30 AM",
-      "end_time": "05:30 PM",
-      "is_public": "N",
-      "trainer_rhn_id": "",
-      "trainer": "Instructor-MS",
-      "trainer_display": "Instructor-MS",
-      "status": "confirmed",
-      "notes": ""
-    },
-    {
-      "id": "2026-05-18-DO180-org-j",
-      "org": "org-j",
-      "org_label": "Org-J",
-      "course": "DO180",
-      "course_desc": "OpenShift I: Containers & Kubernetes",
-      "version": "v4.14",
-      "business_days": 4,
-      "duration": 4,
-      "start_date": "2026-05-18",
-      "end_date": "2026-05-21",
-      "start_date_fmt": "05/18/2026",
-      "end_date_fmt": "05/21/2026",
-      "start_time": "09:30 AM",
-      "end_time": "05:30 PM",
-      "is_public": "N",
-      "trainer_rhn_id": "",
-      "trainer": "Instructor-MS",
-      "trainer_display": "Instructor-MS",
-      "status": "confirmed",
-      "notes": ""
-    },
-    {
-      "id": "2026-05-18-RH134-org-j",
-      "org": "org-j",
-      "org_label": "Org-J",
-      "course": "RH134",
-      "course_desc": "System Administration II",
-      "version": "v10.0",
-      "business_days": 5,
-      "duration": 5,
-      "start_date": "2026-05-18",
-      "end_date": "2026-05-22",
-      "start_date_fmt": "05/18/2026",
-      "end_date_fmt": "05/22/2026",
-      "start_time": "09:30 AM",
-      "end_time": "05:30 PM",
-      "is_public": "N",
-      "trainer_rhn_id": "",
-      "trainer": "Instructor-CM",
-      "trainer_display": "Instructor-CM",
-      "status": "confirmed",
-      "notes": ""
-    },
-    {
-      "id": "2026-05-18-DO188-org-r",
-      "org": "org-r",
-      "org_label": "Org-R",
-      "course": "DO188",
-      "course_desc": "OpenShift Dev I: Introduction",
-      "version": "v4.14",
-      "business_days": 3,
-      "duration": 3,
-      "start_date": "2026-05-18",
-      "end_date": "2026-05-20",
-      "start_date_fmt": "05/18/2026",
-      "end_date_fmt": "05/20/2026",
-      "start_time": "09:30 AM",
-      "end_time": "05:30 PM",
-      "is_public": "N",
-      "trainer_rhn_id": "",
-      "trainer": "Instructor-FM",
-      "trainer_display": "Instructor-FM",
-      "status": "confirmed",
-      "notes": ""
-    },
-    {
-      "id": "2026-05-18-DO316-org-r",
-      "org": "org-r",
-      "org_label": "Org-R",
-      "course": "DO316",
-      "course_desc": "Managing Virtual Machines with OpenShift Virt",
-      "version": "v4.16",
-      "business_days": 5,
-      "duration": 5,
-      "start_date": "2026-05-18",
-      "end_date": "2026-05-22",
-      "start_date_fmt": "05/18/2026",
-      "end_date_fmt": "05/22/2026",
-      "start_time": "09:30 AM",
-      "end_time": "05:30 PM",
-      "is_public": "N",
-      "trainer_rhn_id": "",
-      "trainer": "Instructor-YS",
-      "trainer_display": "Instructor-YS",
-      "status": "confirmed",
-      "notes": ""
-    },
-    {
-      "id": "2026-05-25-DO280-org-j",
-      "org": "org-j",
-      "org_label": "Org-J",
-      "course": "DO280",
-      "course_desc": "OpenShift Admin II",
-      "version": "v4.14",
-      "business_days": 4,
-      "duration": 4,
-      "start_date": "2026-05-25",
-      "end_date": "2026-05-28",
-      "start_date_fmt": "05/25/2026",
-      "end_date_fmt": "05/28/2026",
-      "start_time": "09:30 AM",
-      "end_time": "05:30 PM",
-      "is_public": "N",
-      "trainer_rhn_id": "",
-      "trainer": "Instructor-CM",
-      "trainer_display": "Instructor-CM",
-      "status": "confirmed",
-      "notes": ""
-    },
-    {
-      "id": "2026-05-25-DO288-org-j",
-      "org": "org-j",
-      "org_label": "Org-J",
-      "course": "DO288",
-      "course_desc": "OpenShift Dev II: Building & Deploying",
-      "version": "v4.14",
-      "business_days": 4,
-      "duration": 4,
-      "start_date": "2026-05-25",
-      "end_date": "2026-05-28",
-      "start_date_fmt": "05/25/2026",
-      "end_date_fmt": "05/28/2026",
-      "start_time": "09:30 AM",
-      "end_time": "05:30 PM",
-      "is_public": "N",
-      "trainer_rhn_id": "",
-      "trainer": "Instructor-MS",
-      "trainer_display": "Instructor-MS",
-      "status": "confirmed",
-      "notes": ""
-    }
-  ]
-}
+period: "2026-04/2026-12"
+holidays:
+  - date: "2026-04-29"  # 昭和の日
+  - date: "2026-05-03"  # 憲法記念日
+  - date: "2026-05-04"  # みどりの日
+  - date: "2026-05-05"  # こどもの日
+  - date: "2026-05-06"  # 振替休日
+  - date: "2026-07-20"  # 海の日
+  - date: "2026-08-11"  # 山の日
+  - date: "2026-09-21"  # 敬老の日
+  - date: "2026-09-23"  # 秋分の日
+  - date: "2026-10-12"  # スポーツの日
+  - date: "2026-11-03"  # 文化の日
+  - date: "2026-11-23"  # 勤労感謝の日
+schedules:
+  - id: "2026-04-06-DO288-org-j"
+    org: "org-j"
+    course: "DO288"
+    version: "v4.14"
+    business_days: 4
+    duration: 4
+    start_date: "2026-04-06"
+    end_date: "2026-04-09"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-MS"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-04-06-RH134-org-j"
+    org: "org-j"
+    course: "RH134"
+    version: "v10.0"
+    business_days: 5
+    duration: 5
+    start_date: "2026-04-06"
+    end_date: "2026-04-10"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-CM"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-04-13-DO180-org-j"
+    org: "org-j"
+    course: "DO180"
+    version: "v4.14"
+    business_days: 4
+    duration: 4
+    start_date: "2026-04-13"
+    end_date: "2026-04-16"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-MS"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-04-13-RH134-org-j"
+    org: "org-j"
+    course: "RH134"
+    version: "v10.0"
+    business_days: 5
+    duration: 5
+    start_date: "2026-04-13"
+    end_date: "2026-04-17"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-CM"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-04-13-DO316-org-r"
+    org: "org-r"
+    course: "DO316"
+    version: "v4.16"
+    business_days: 5
+    duration: 5
+    start_date: "2026-04-13"
+    end_date: "2026-04-17"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-YS"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-04-13-RH199-org-r"
+    org: "org-r"
+    course: "RH199"
+    version: "v10.0"
+    business_days: 5
+    duration: 5
+    start_date: "2026-04-13"
+    end_date: "2026-04-17"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-FM"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-04-20-AU294-org-j"
+    org: "org-j"
+    course: "AU294"
+    version: "v9.0"
+    business_days: 4
+    duration: 4
+    start_date: "2026-04-20"
+    end_date: "2026-04-23"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-MS"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-04-20-DO188-org-r"
+    org: "org-r"
+    course: "DO188"
+    version: "v4.14"
+    business_days: 3
+    duration: 3
+    start_date: "2026-04-20"
+    end_date: "2026-04-22"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-FM"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-05-11-RH199-org-j"
+    org: "org-j"
+    course: "RH199"
+    version: "v10.0"
+    business_days: 5
+    duration: 5
+    start_date: "2026-05-11"
+    end_date: "2026-05-15"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-MS"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-05-18-DO180-org-j"
+    org: "org-j"
+    course: "DO180"
+    version: "v4.14"
+    business_days: 4
+    duration: 4
+    start_date: "2026-05-18"
+    end_date: "2026-05-21"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-MS"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-05-18-RH134-org-j"
+    org: "org-j"
+    course: "RH134"
+    version: "v10.0"
+    business_days: 5
+    duration: 5
+    start_date: "2026-05-18"
+    end_date: "2026-05-22"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-CM"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-05-18-DO188-org-r"
+    org: "org-r"
+    course: "DO188"
+    version: "v4.14"
+    business_days: 3
+    duration: 3
+    start_date: "2026-05-18"
+    end_date: "2026-05-20"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-FM"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-05-18-DO316-org-r"
+    org: "org-r"
+    course: "DO316"
+    version: "v4.16"
+    business_days: 5
+    duration: 5
+    start_date: "2026-05-18"
+    end_date: "2026-05-22"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-YS"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-05-25-DO280-org-j"
+    org: "org-j"
+    course: "DO280"
+    version: "v4.14"
+    business_days: 4
+    duration: 4
+    start_date: "2026-05-25"
+    end_date: "2026-05-28"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-CM"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-05-25-DO288-org-j"
+    org: "org-j"
+    course: "DO288"
+    version: "v4.14"
+    business_days: 4
+    duration: 4
+    start_date: "2026-05-25"
+    end_date: "2026-05-28"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-MS"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-06-01-RH124-org-j"
+    org: "org-j"
+    course: "RH124"
+    version: "v10.0"
+    business_days: 5
+    duration: 5
+    start_date: "2026-06-01"
+    end_date: "2026-06-05"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-CM"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-06-08-DO180-org-j"
+    org: "org-j"
+    course: "DO180"
+    version: "v4.14"
+    business_days: 4
+    duration: 4
+    start_date: "2026-06-08"
+    end_date: "2026-06-11"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-MS"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-06-08-RH134-org-j"
+    org: "org-j"
+    course: "RH134"
+    version: "v10.0"
+    business_days: 5
+    duration: 5
+    start_date: "2026-06-08"
+    end_date: "2026-06-12"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-CM"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-06-10-DO188-org-r"
+    org: "org-r"
+    course: "DO188"
+    version: "v4.14"
+    business_days: 3
+    duration: 3
+    start_date: "2026-06-10"
+    end_date: "2026-06-12"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-FM"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-06-15-RH199-org-j"
+    org: "org-j"
+    course: "RH199"
+    version: "v10.0"
+    business_days: 5
+    duration: 5
+    start_date: "2026-06-15"
+    end_date: "2026-06-19"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-CM"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-06-15-DO288-org-j"
+    org: "org-j"
+    course: "DO288"
+    version: "v4.14"
+    business_days: 4
+    duration: 4
+    start_date: "2026-06-15"
+    end_date: "2026-06-18"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-MS"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-06-15-DO316-org-r"
+    org: "org-r"
+    course: "DO316"
+    version: "v4.16"
+    business_days: 5
+    duration: 5
+    start_date: "2026-06-15"
+    end_date: "2026-06-19"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-YS"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-06-22-AU294-org-j"
+    org: "org-j"
+    course: "AU294"
+    version: "v9.0"
+    business_days: 4
+    duration: 4
+    start_date: "2026-06-22"
+    end_date: "2026-06-25"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-CM"
+    status: "confirmed"
+    notes: ""
+  - id: "2026-06-29-DO280-org-j"
+    org: "org-j"
+    course: "DO280"
+    version: "v4.14"
+    business_days: 4
+    duration: 4
+    start_date: "2026-06-29"
+    end_date: "2026-07-02"
+    start_time: "09:30 AM"
+    end_time: "05:30 PM"
+    is_public: "N"
+    trainer_rhn_id: ""
+    trainer: "Instructor-MS"
+    status: "confirmed"
+    notes: ""
