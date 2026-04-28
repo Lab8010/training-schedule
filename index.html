@@ -1377,7 +1377,7 @@ function importFromMasterData(data) {
     newPlacements.push({id, courseId, start: startDate, days, org: org.id,
       isPublic: s.is_public || 'N', startTime: s.start_time || '09:30 AM', endTime: s.end_time || '05:30 PM'});
     newAssignments[id] = {
-      instructor:   s.instructor || '',
+      instructor:   s.instructor || s.trainer || '',
       trainerRhnId: s.trainer_rhn_id || '',
       status:       s.status || 'unassigned',
       notes:        s.notes || '',
