@@ -230,11 +230,24 @@
   <div class="excel-section">
     <div class="section-title" data-i18n="xlsxSection">Excel (xlsx)</div>
     <div class="excel-toolbar">
+      <select id="export-org-filter" style="padding:6px 8px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:12px;color:#1e293b;background:white">
+        <option value="">全組織</option>
+        <option value="org-r">Org-R</option>
+        <option value="org-j">Org-J</option>
+        <option value="org-i">Org-I</option>
+      </select>
       <button class="btn btn-primary" onclick="exportXLSX()" data-i18n="xlsxExport">xlsx エクスポート</button>
+      <select id="import-org-filter" style="padding:6px 8px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:12px;color:#1e293b;background:white">
+        <option value="">全組織（全件置換）</option>
+        <option value="org-r">Org-R のみ（差分）</option>
+        <option value="org-j">Org-J のみ（差分）</option>
+        <option value="org-i">Org-I のみ（差分）</option>
+      </select>
       <label class="btn btn-ghost" style="cursor:pointer">
         <span data-i18n="xlsxImport">xlsx インポート</span>
         <input type="file" id="xlsx-file-input" accept=".xlsx,.xls" style="display:none" onchange="handleXLSXImport(this.files[0])">
       </label>
+      <button class="btn btn-ghost" onclick="downloadMasterJSON()" data-i18n="masterJsonDownload">マスター JSON ダウンロード</button>
     </div>
     <div class="import-drop" id="import-drop"
       ondragover="event.preventDefault();this.classList.add('drag-over')"
@@ -361,6 +374,8 @@ const I18N = {
     xlsxEmpty:   'データが見つかりません',
     xlsxError:   '読み込みエラー: ',
     exportPublicOnlyQ: '公開に必要な情報のみに絞りますか？\n（OK → is_public=Y のみ・講師情報を除外 / キャンセル → 全データ）',
+    masterJsonDownload: 'マスター JSON ダウンロード',
+    xlsxMergeImported: '{count}件を{org}として差分インポートしました',
   },
   en: {
     appTitle: 'Training Schedule Manager',
@@ -421,6 +436,8 @@ const I18N = {
     xlsxEmpty:   'No data found',
     xlsxError:   'Read error: ',
     exportPublicOnlyQ: 'Export public records only?\n（OK → is_public=Y, trainer info excluded / Cancel → all data）',
+    masterJsonDownload: 'Download Master JSON',
+    xlsxMergeImported: '{count} records merged into {org}',
   },
 };
 
@@ -591,6 +608,8 @@ const DOW   = ['月','火','水','木','金','土','日'];
 // ── 状態 ──────────────────────────────────────────────────
 const MONTHS = ['2026-04','2026-05','2026-06','2026-07','2026-08','2026-09','2026-10','2026-11','2026-12'];
 let currentMonth = '2026-04';
+
+function currentYear() { return parseInt(currentMonth.split('-')[0]); }
 
 let placements   = [];
 let assignments  = {};
@@ -1127,7 +1146,7 @@ function downloadExport() {
 
 // ── xlsx エクスポート ──────────────────────────────────────
 function exportXLSX() {
-  // Column order as specified (+ 組織/公開クラス at end for round-trip import)
+  const orgFilter = document.getElementById('export-org-filter').value || null;
   const headers = [
     'Training SKU', 'Duration', 'Version',
     'Start Date', 'End Date', 'Start Time', 'End Time',
@@ -1141,7 +1160,8 @@ function exportXLSX() {
     '', '',
   ];
 
-  const rows = buildScheduleList().map(s => [
+  const list = buildScheduleList().filter(s => !orgFilter || s.org === orgFilter);
+  const rows = list.map(s => [
     s.course,
     s.duration,
     s.version,
@@ -1166,13 +1186,16 @@ function exportXLSX() {
 
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Schedule');
-  XLSX.writeFile(wb, 'training-schedule.xlsx');
-  showToast('training-schedule.xlsx をダウンロードしました');
+  const orgSuffix = orgFilter ? `-${orgFilter}` : '-all';
+  const filename  = `schedule${orgSuffix}-${currentYear()}.xlsx`;
+  XLSX.writeFile(wb, filename);
+  showToast(`${filename} をダウンロードしました`);
 }
 
 // ── xlsx インポート ────────────────────────────────────────
 function handleXLSXImport(file) {
   if (!file) return;
+  const orgFilter = document.getElementById('import-org-filter').value || null;
   const reader = new FileReader();
   reader.onerror = () => setImportResult(t('xlsxError') + 'FileReader failure', true);
   reader.onload = e => {
@@ -1181,22 +1204,32 @@ function handleXLSXImport(file) {
       const ws   = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
 
-      // New column order: Training SKU(0), Duration(1), Version(2),
-      // Start Date(3), End Date(4), Start Time(5), End Time(6),
-      // Trainer RHN ID(7), Trainer Name(8), Comments(9), 組織(10), 公開クラス(11)
-      // Skip header/note rows (rows where col0 is not a course-like value)
+      // ヘッダー行を動的に検索（固定行番号に依存しない）
+      let headerRowIdx = -1;
+      for (let i = 0; i < rows.length; i++) {
+        if (String(rows[i][0]).trim() === 'Training SKU') { headerRowIdx = i; break; }
+      }
+
       const dataRows = rows.filter((r, i) => {
-        if (i < 2) return false; // skip header + note row
+        if (headerRowIdx >= 0 && i <= headerRowIdx) return false;
         const sku = String(r[0] || '').trim();
-        return sku.length > 0 && sku !== 'Training SKU';
+        return sku.length > 0 && !sku.startsWith('(');
       });
 
       if (dataRows.length === 0) { setImportResult(t('xlsxEmpty'), true); return; }
 
-      const newPlacements  = [];
-      const newAssignments = {};
-      let   newId = nextId;
-      let   count = 0;
+      // 差分マージ: 指定組織のみ削除して置き換え、他組織は保持
+      if (orgFilter) {
+        const removedIds = placements.filter(p => p.org === orgFilter).map(p => p.id);
+        placements = placements.filter(p => p.org !== orgFilter);
+        removedIds.forEach(pid => delete assignments[pid]);
+      } else {
+        placements  = [];
+        assignments = {};
+      }
+
+      let newId = nextId;
+      let count = 0;
 
       dataRows.forEach(row => {
         const courseId     = String(row[0]  || '').trim().toUpperCase();
@@ -1207,41 +1240,51 @@ function handleXLSXImport(file) {
         const trainerRhnId = String(row[7]  || '').trim();
         const trainerName  = String(row[8]  || '').trim();
         const notes        = String(row[9]  || '').trim();
-        const orgLabel     = String(row[10] || '').trim();
+        const orgRaw       = String(row[10] || '').trim().toLowerCase().replace(/\s/g, '');
         const isPublic     = String(row[11] || 'N').trim().toUpperCase() === 'Y' ? 'Y' : 'N';
 
-        // Trainer Name: convert display values back to internal values
+        if (!courseId || courseId.startsWith('(')) return;
+
         let instructor = trainerName;
         if (trainerName === '未割り当て' || trainerName === '') instructor = '';
         if (trainerName === '割り当て不可' || trainerName === 'Unavailable') instructor = '__unavail__';
 
-        if (!courseId) return;
-
         const startDate = fromMMDDYYYY(cellToDateStr(startRaw));
         if (!startDate || !allDays().includes(startDate)) return;
 
-        const org = orgLabel ? ORGS.find(o => o.label === orgLabel) : ORGS[0];
-        if (!org) return;
+        // 組織解決: orgFilter 指定時は強制、なければ柔軟照合
+        let org;
+        if (orgFilter) {
+          org = ORGS.find(o => o.id === orgFilter) || ORGS[0];
+        } else {
+          org = ORGS.find(o =>
+            o.id.toLowerCase() === orgRaw ||
+            o.label.toLowerCase() === orgRaw ||
+            o.label.toLowerCase().replace('-', '') === orgRaw.replace('-', '')
+          ) || ORGS[0];
+        }
 
-        // Add to COURSE_LIB if new
         if (!getCourse(courseId)) {
-          COURSE_LIB.push({id:courseId, ver:version||'v1.0', days:1, desc:courseId});
+          COURSE_LIB.push({id: courseId, ver: version || 'v1.0', days: 1, desc: courseId});
         }
         const days = getCourse(courseId)?.days || 1;
 
         const id = `p${newId++}`;
-        newPlacements.push({id, courseId, start:startDate, days, org:org.id, isPublic, startTime, endTime});
-        newAssignments[id] = {instructor, trainerRhnId, status:'unassigned', notes};
+        placements.push({id, courseId, start: startDate, days, org: org.id, isPublic, startTime, endTime});
+        assignments[id] = {instructor, trainerRhnId, status: 'unassigned', notes};
         count++;
       });
 
-      placements  = newPlacements;
-      assignments = newAssignments;
-      nextId      = newId;
+      nextId = newId;
 
       renderAdminView();
       if (document.getElementById('view-export').classList.contains('active')) renderExport();
-      setImportResult(`✅ ${count} ${t('xlsxImported')}`);
+
+      const orgLabel = orgFilter ? (ORGS.find(o => o.id === orgFilter)?.label || orgFilter) : null;
+      const msg = orgLabel
+        ? `✅ ` + t('xlsxMergeImported').replace('{count}', count).replace('{org}', orgLabel)
+        : `✅ ${count} ${t('xlsxImported')}`;
+      setImportResult(msg);
       document.getElementById('xlsx-file-input').value = '';
     } catch(err) {
       setImportResult(t('xlsxError') + err.message, true);
@@ -1276,10 +1319,94 @@ function showToast(msg) {
   setTimeout(() => t.remove(), 3000);
 }
 
+// ── マスター JSON ─────────────────────────────────────────
+function downloadMasterJSON() {
+  const year = currentYear();
+  const list = buildScheduleList();
+  const now  = new Date();
+  const jst  = new Date(now.getTime() + 9 * 3600000);
+  const iso  = jst.toISOString().replace('Z', '+09:00');
+  const data = {
+    year,
+    generated_at: iso,
+    schedules: list.map(s => ({
+      id:              s.id,
+      org:             s.org,
+      org_label:       s.org_label,
+      course:          s.course,
+      version:         s.version,
+      business_days:   s.business_days,
+      duration:        s.duration,
+      start_date:      s.start_date,
+      end_date:        s.end_date,
+      start_date_fmt:  s.start_date_fmt,
+      end_date_fmt:    s.end_date_fmt,
+      start_time:      s.start_time,
+      end_time:        s.end_time,
+      is_public:       s.is_public,
+      trainer_rhn_id:  s.trainer_rhn_id,
+      instructor:      s.trainer,
+      trainer_display: s.trainer_display,
+      status:          s.status,
+      notes:           s.notes,
+    })),
+  };
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], {type: 'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement('a'), {href: url, download: `master-${year}.json`});
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`master-${year}.json をダウンロードしました`);
+}
+
+function importFromMasterData(data) {
+  const newPlacements  = [];
+  const newAssignments = {};
+  let   newId = 1;
+  (data.schedules || []).forEach(s => {
+    const courseId  = s.course;
+    const startDate = s.start_date;
+    if (!courseId || !startDate || !allDays().includes(startDate)) return;
+    const org = ORGS.find(o => o.id === s.org) || ORGS[0];
+    if (!getCourse(courseId)) {
+      COURSE_LIB.push({id: courseId, ver: s.version || 'v1.0', days: s.business_days || 1, desc: courseId});
+    }
+    const days = s.business_days || getCourse(courseId)?.days || 1;
+    const id   = `p${newId++}`;
+    newPlacements.push({id, courseId, start: startDate, days, org: org.id,
+      isPublic: s.is_public || 'N', startTime: s.start_time || '09:30 AM', endTime: s.end_time || '05:30 PM'});
+    newAssignments[id] = {
+      instructor:   s.instructor || '',
+      trainerRhnId: s.trainer_rhn_id || '',
+      status:       s.status || 'unassigned',
+      notes:        s.notes || '',
+    };
+  });
+  placements  = newPlacements;
+  assignments = newAssignments;
+  nextId      = newId;
+}
+
+async function loadMasterData() {
+  const year  = currentYear();
+  const url   = `https://raw.githubusercontent.com/Lab8010/training-schedule/main/schedules/master-${year}.json`;
+  const calEl = document.getElementById('admin-cal');
+  calEl.innerHTML = '<div style="padding:32px;text-align:center;color:#64748b;font-size:13px">読み込み中...</div>';
+  try {
+    const res = await fetch(url);
+    if (res.ok) {
+      const data = await res.json();
+      importFromMasterData(data);
+    }
+  } catch(e) { /* network error or file not found: keep blank state */ }
+  renderAdminView();
+}
+
 // ── 初期化 ─────────────────────────────────────────────────
 document.getElementById('f-status').innerHTML = statusOptsHTML();
 updateMonthNav();
-renderAdminView();
+loadMasterData();
 </script>
 </body>
 </html>
