@@ -1214,8 +1214,9 @@ function showExportChoice(cb) {
 }
 
 function confirmExportChoice(publicOnly) {
+  const cb = _exportChoiceCb;
   closeExportChoice();
-  if (_exportChoiceCb) _exportChoiceCb(publicOnly);
+  if (cb) cb(publicOnly);
 }
 
 function closeExportChoice() {
