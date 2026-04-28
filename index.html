@@ -162,11 +162,10 @@
     .import-drop:hover, .import-drop.drag-over { border-color:#3b82f6; background:#eff6ff; color:#3b82f6; }
     .import-result { margin-top:8px; font-size:12px; color:#475569; }
 
-    /* Month navigation */
-    .month-nav { background: white; border-bottom: 1px solid #e2e8f0; padding: 8px 20px; display: flex; align-items: center; justify-content: center; gap: 16px; }
-    .month-nav-label { font-size: 15px; font-weight: 700; color: #1e293b; min-width: 160px; text-align: center; }
-    .month-nav .btn { padding: 5px 16px; font-size: 12px; }
-    .month-nav .btn:disabled { opacity: 0.3; cursor: not-allowed; filter: none; }
+    /* Month navigation — hidden (replaced by vertical scroll) */
+    #month-nav { display: none; }
+
+    .calendar-panel { flex: 1; min-width: 0; padding: 14px 16px; height: calc(100vh - 115px); overflow-y: auto; }
   </style>
 </head>
 <body>
@@ -507,6 +506,7 @@ const COURSE_LIB = [
   {id:'RH134', ver:'v10.0', days:5, desc:'System Administration II'},
   {id:'RH199', ver:'v10.0', days:5, desc:'RHCSA Rapid Track'},
   {id:'AU294', ver:'v9.0',  days:4, desc:'RHEL Automation with Ansible'},
+  {id:'CL170', ver:'v18.0', days:2, desc:'CL170'},
   {id:'DO180', ver:'v4.14', days:4, desc:'OpenShift I: Containers & Kubernetes'},
   {id:'DO188', ver:'v4.14', days:3, desc:'OpenShift Dev I: Introduction'},
   {id:'DO280', ver:'v4.14', days:4, desc:'OpenShift Admin II'},
@@ -514,7 +514,6 @@ const COURSE_LIB = [
   {id:'DO316', ver:'v4.16', days:5, desc:'Managing Virtual Machines with OpenShift Virt'},
   {id:'DO370', ver:'v1.2',  days:3, desc:'Red Hat AI/ML Pipelines'},
   {id:'DO380', ver:'v4.14', days:4, desc:'OpenShift Administration III'},
-  {id:'EX200', ver:'v10.0', days:1, desc:'RHCSA Exam'},
 ];
 
 const ORGS = [
@@ -681,7 +680,6 @@ document.getElementById('tab-bar').addEventListener('click', e => {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   tab.classList.add('active');
   document.getElementById(`view-${view}`).classList.add('active');
-  document.getElementById('month-nav').style.display = view === 'export' ? 'none' : 'flex';
   if (view === 'export') renderExport();
   if (view === 'org')    renderOrgView();
   if (view === 'admin')  renderAdminView();
@@ -793,10 +791,17 @@ function renderCalendarGrid(elId, orgFilter, isAdmin) {
     ).join('')}
   </div>`;
 
-  const monthWeeks = WEEKS.map((w, i) => ({...w, globalIdx: i}))
-                          .filter(w => w.month === currentMonth);
+  const allIndexedWeeks = WEEKS.map((w, i) => ({...w, globalIdx: i}));
 
-  monthWeeks.forEach(week => {
+  MONTHS.forEach(month => {
+    const monthWeeks = allIndexedWeeks.filter(w => w.month === month);
+    if (monthWeeks.length === 0) return;
+    const mName = t('monthNames')[parseInt(month.split('-')[1]) - 1];
+    const mYear = month.split('-')[0];
+    const label = currentLang === 'ja' ? `${mYear}年 ${mName}` : `${mName} ${mYear}`;
+    html += `<div class="month-header-div">${label}</div>`;
+
+    monthWeeks.forEach(week => {
     const wIdx = week.globalIdx;
     const {segments, laneOf, laneCount} = computeWeekLanes(wIdx, orgFilter);
     const totalRows = 1 + Math.max(laneCount, 1);
@@ -880,6 +885,7 @@ function renderCalendarGrid(elId, orgFilter, isAdmin) {
     });
 
     html += `<div class="week-section">${inner}</div>`;
+    });
   });
 
   el.innerHTML = html;
