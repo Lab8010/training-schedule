@@ -236,18 +236,7 @@
 
 <!-- Export View -->
 <div id="view-export" class="view">
-  <div class="export-toolbar">
-    <div class="fmt-group">
-      <button class="btn fmt-btn btn-primary" data-fmt="yaml" onclick="setExportFmt('yaml')">YAML</button>
-      <button class="btn fmt-btn btn-ghost"   data-fmt="json" onclick="setExportFmt('json')">JSON</button>
-      <button class="btn fmt-btn btn-ghost"   data-fmt="xml"  onclick="setExportFmt('xml')">XML</button>
-    </div>
-    <button class="btn btn-primary" onclick="copyExport()" data-i18n="copyBtn">クリップボードにコピー</button>
-    <button class="btn btn-ghost"   onclick="downloadExport()" data-i18n="downloadBtn">ダウンロード</button>
-  </div>
-  <pre class="export-pre" id="export-pre"></pre>
-
-  <div class="excel-section">
+  <div class="excel-section" style="border-top:none;margin-top:0;padding-top:0;margin-bottom:20px">
     <div class="section-title" data-i18n="xlsxSection">Excel (xlsx)</div>
     <div class="excel-toolbar">
       <select id="export-org-filter" style="padding:6px 8px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:12px;color:#1e293b;background:white">
@@ -277,6 +266,19 @@
       <span data-i18n="xlsxDropHint">xlsx ファイルをここにドロップ、またはクリックして選択</span>
     </div>
     <div class="import-result" id="import-result"></div>
+  </div>
+
+  <div style="border-top:1px solid #e2e8f0;padding-top:14px">
+    <div class="export-toolbar">
+      <div class="fmt-group">
+        <button class="btn fmt-btn btn-primary" data-fmt="yaml" onclick="setExportFmt('yaml')">YAML</button>
+        <button class="btn fmt-btn btn-ghost"   data-fmt="json" onclick="setExportFmt('json')">JSON</button>
+        <button class="btn fmt-btn btn-ghost"   data-fmt="xml"  onclick="setExportFmt('xml')">XML</button>
+      </div>
+      <button class="btn btn-primary" onclick="copyExport()" data-i18n="copyBtn">クリップボードにコピー</button>
+      <button class="btn btn-ghost"   onclick="downloadExport()" data-i18n="downloadBtn">ダウンロード</button>
+    </div>
+    <pre class="export-pre" id="export-pre"></pre>
   </div>
 </div>
 
@@ -345,6 +347,33 @@
       <button class="btn btn-danger"  onclick="deletePlacement()" data-i18n="deleteBtn">削除</button>
       <button class="btn btn-ghost"   onclick="closeModal()"      data-i18n="cancelBtn">キャンセル</button>
       <button class="btn btn-primary" onclick="saveAssignment()"  data-i18n="saveBtn">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export Choice Modal -->
+<div class="modal-overlay" id="export-choice-overlay" style="display:none">
+  <div class="modal" style="width:380px">
+    <div class="modal-header">
+      <h2>エクスポート範囲の選択</h2>
+      <div class="sub">出力するデータを選択してください</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+      <button onclick="confirmExportChoice(true)"
+        style="width:100%;text-align:left;padding:12px 16px;border:1.5px solid #e2e8f0;border-radius:8px;background:#f8fafc;cursor:pointer;transition:background 0.15s"
+        onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='#f8fafc'">
+        <div style="font-weight:700;color:#1e293b;font-size:13px">公開データのみ</div>
+        <div style="font-size:11px;color:#64748b;margin-top:3px">is_public=Y のクラスのみ・講師情報を除外</div>
+      </button>
+      <button onclick="confirmExportChoice(false)"
+        style="width:100%;text-align:left;padding:12px 16px;border:1.5px solid #3b82f6;border-radius:8px;background:#3b82f6;cursor:pointer;transition:opacity 0.15s"
+        onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+        <div style="font-weight:700;color:white;font-size:13px">全データ</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.85);margin-top:3px">講師情報・全ステータスを含む完全データ</div>
+      </button>
+    </div>
+    <div class="modal-actions" style="padding-top:12px;margin-top:8px;border-top:1px solid #f1f5f9">
+      <button class="btn btn-ghost" onclick="closeExportChoice()">キャンセル</button>
     </div>
   </div>
 </div>
@@ -1177,22 +1206,41 @@ function buildExportContent(publicOnly) {
   return generateYAML(list, publicOnly);
 }
 
+let _exportChoiceCb = null;
+
+function showExportChoice(cb) {
+  _exportChoiceCb = cb;
+  document.getElementById('export-choice-overlay').style.display = 'flex';
+}
+
+function confirmExportChoice(publicOnly) {
+  closeExportChoice();
+  if (_exportChoiceCb) _exportChoiceCb(publicOnly);
+}
+
+function closeExportChoice() {
+  document.getElementById('export-choice-overlay').style.display = 'none';
+  _exportChoiceCb = null;
+}
+
 function copyExport() {
-  const publicOnly = confirm(t('exportPublicOnlyQ'));
-  const content = buildExportContent(publicOnly);
-  navigator.clipboard.writeText(content).then(() => showToast(t('toastCopied')));
+  showExportChoice(publicOnly => {
+    const content = buildExportContent(publicOnly);
+    navigator.clipboard.writeText(content).then(() => showToast(t('toastCopied')));
+  });
 }
 
 function downloadExport() {
-  const publicOnly = confirm(t('exportPublicOnlyQ'));
-  const content = buildExportContent(publicOnly);
-  const ext  = exportFmt;
-  const mime = {yaml:'text/yaml', json:'application/json', xml:'application/xml'}[ext] || 'text/plain';
-  const blob = new Blob([content], {type: mime});
-  const url  = URL.createObjectURL(blob);
-  const a    = Object.assign(document.createElement('a'), {href: url, download: `master.${ext}`});
-  a.click();
-  URL.revokeObjectURL(url);
+  showExportChoice(publicOnly => {
+    const content = buildExportContent(publicOnly);
+    const ext  = exportFmt;
+    const mime = {yaml:'text/yaml', json:'application/json', xml:'application/xml'}[ext] || 'text/plain';
+    const blob = new Blob([content], {type: mime});
+    const url  = URL.createObjectURL(blob);
+    const a    = Object.assign(document.createElement('a'), {href: url, download: `master.${ext}`});
+    a.click();
+    URL.revokeObjectURL(url);
+  });
 }
 
 // ── xlsx エクスポート ──────────────────────────────────────
